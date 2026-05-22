@@ -15,8 +15,9 @@ const uploadOnCloudinary = async (localFilePath) => {
       resource_type: "auto",
     });
     //file uploaded successfully, now delete the file from local storage
-    fs.unlinkSync(localFilePath)
+    fs.unlinkSync(localFilePath);
     // console.log("File uploaded successfully on Cloudinary: ", response.url);
+    //console.log(response) this was used to check cloudinary response in order to extract video duration
     return response;
   } catch (error) {
     fs.unlinkSync(localFilePath); //delete the locally saved temporary file from local storage
