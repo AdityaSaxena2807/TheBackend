@@ -3,9 +3,10 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 //routes import
 import userRouter from "./routes/user.routes.js";
+import errorHandler from "./middlewares/errorHandler.middleware.js";
 //cookie-parser's role is that it allows the server to perform crud operation on the cookies in browser of the client
 
-const app = express()
+const app = express();
 app.use(
   cors({
     origin: process.env.CORS_ORIGIN,
@@ -27,6 +28,7 @@ app.use(cookieParser());
 
 //routes declaration
 app.use("/api/v1/users", userRouter);
+app.use(errorHandler);
 /** 
 here /api/v1/users is the prefix for all the routes in userRouter. So, if there is 
 a route /register in userRouter, then it will be accessed as /api/v1/users/register in the app.

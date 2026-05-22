@@ -173,8 +173,10 @@ const loginUser = asyncHandler(async (req, res) => {
 const logoutUser = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(
     req.user._id,
-    { $set: { refreshToken: "" } },
-    { returnDocument: "after" }
+    //unset is used to remove the field from the document by passing a flag(1) or true for the field to be removed
+    { $unset: { refreshToken: 1 } },
+    //new is used to return the updated document
+    { new: true }
   );
 
   const Options = {
@@ -202,13 +204,18 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       incomingRefreshToken,
       process.env.REFRESH_TOKEN_SECRET
     );
-
+    /** Example:
+        Let's say you have a locked box (token) with information inside it like {"user_id": "1234"}.
+        You use a secret key like mysecretkey to lock it.
+        When the server receives the token, it uses mysecretkey to unlock it.
+        If the secret key matches, the server gets the payload {"user_id": "1234"} and trusts the information.
+        If it doesn't match (someone tries to tamper with the token), it will throw an error, and the server will reject the token.**/
     const user = await User.findById(decodedToken?._id);
 
     if (!user) {
       throw new ApiError("Invalid refresh token", 404);
     }
-
+    //check if the refresh token in the database matches the incoming refresh token as an extra security measure to prevent token reuse after logout or token theft
     if (user?.refreshToken != incomingRefreshToken) {
       throw new ApiError("Refresh token is expired or invalid", 404);
     }
@@ -217,13 +224,14 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       httpOnly: true,
       secure: true,
     };
-    const { accessToken, newRefreshToken } =
-      await generateAccessAndRefreshToken(user._id);
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+      user._id
+    );
 
     return res
       .status(200)
       .cookie("accessToken", accessToken, options)
-      .cookie("refreshToken", newRefreshToken, options)
+      .cookie("refreshToken", refreshToken, options)
       .json(
         new ApiResponse(
           200,
@@ -249,9 +257,11 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
   }
   user.password = newPassword;
   await user.save({ validateBeforeSave: false });
-  return res
-    .status(200)
-    .json(new ApiResponse(200, {}, "Password changed successfully"));
+  return res.status(200).json(
+    new ApiResponse(200, "Password changed successfully", {
+      newPassword: newPassword,
+    })
+  );
 });
 
 //! GET CURRENT USER DETAILS
@@ -486,5 +496,4 @@ export {
   updateUserCoverImage,
   getUserChannelProfile,
   getWatchHistory,
-  
 };
