@@ -36,6 +36,7 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, { isLiked: true, likesCount }));
 });
 
+//! TOGGLE LIKE ON COMMENT
 const toggleCommentLike = asyncHandler(async (req, res) => {
   //TODO: toggle like on comment
   const { commentId } = req.params;
@@ -65,6 +66,7 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, { isLiked: true, likesCount }));
 });
 
+//! TOGGLE LIKE ON TWEET
 const toggleTweetLike = asyncHandler(async (req, res) => {
   //TODO: toggle like on tweet
   const { tweetId } = req.params;
@@ -94,8 +96,84 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, { isLiked: true, likesCount }));
 });
 
+//! GET ALL LIKED VIDEOS
 const getLikedVideos = asyncHandler(async (req, res) => {
   //TODO: get all liked videos
+  // const likedVideos = await Like.find({ likedBy: req.user._id, likedOn: "video" }).populate("video");
+  // const videos = likedVideos.map((like) => like.video);
+  // return res.status(200).json(new ApiResponse(200, videos));
+  const likesAggregate = await Like.aggregate([
+    {
+      $match: {
+        //likedBy: new mongoose.Types.ObjectId(req.user._id),
+        //Above is used when we want to extract all liked videos by current user
+
+        likedOn: "video",
+        //Above is used when we want to extract all liked videos by all users
+      },
+    },
+    {
+      $lookup: {
+        from: "videos",
+        localField: "video",
+        foreignField: "_id",
+        as: "likedVideo",
+        pipeline: [
+          {
+            $lookup: {
+              from: "users",
+              localField: "owner",
+              foreignField: "_id",
+              as: "ownerDetails",
+            },
+          },
+          {
+            $unwind: "$ownerDetails",
+          },
+        ],
+      },
+    },
+    {
+      $unwind: "$likedVideo",
+    },
+    {
+      $sort: {
+        createdAt: -1,
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        likedBy: 1,
+        likedVideo: {
+          _id: 1,
+          "videoFile.url": 1,
+          "thumbnail.url": 1,
+          owner: 1,
+          title: 1,
+          description: 1,
+          views: 1,
+          duration: 1,
+          createdAt: 1,
+          isPublished: 1,
+          ownerDetails: {
+            username: 1,
+            fullName: 1,
+            "avatar.url": 1,
+          },
+        },
+      },
+    },
+  ]);
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        likesAggregate,
+        "liked videos fetched successfully"
+      )
+    );
 });
 
 export { toggleCommentLike, toggleTweetLike, toggleVideoLike, getLikedVideos };
