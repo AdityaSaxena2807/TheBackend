@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import { Comment } from "../models/comment.models.js";
+import { Video } from "../models/video.models.js";
+import { Like } from "../models/like.models.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
@@ -13,7 +15,8 @@ const getVideoComments = asyncHandler(async (req, res) => {
   if (!video) {
     throw new ApiError(404, "Video not found");
   }
-  const commentsAggregate = await Comment.aggregate([
+  //removing the await here because we are using aggregatePaginate which will handle the execution of the aggregate function and pagination together
+  const commentsAggregate = Comment.aggregate([
     {
       $match: {
         video: new mongoose.Types.ObjectId(videoId),
@@ -31,7 +34,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
       $lookup: {
         from: "likes",
         localField: "_id",
-        foreignField: "comments",
+        foreignField: "comment",
         as: "likeDetails",
       },
     },
@@ -131,7 +134,7 @@ const updateComment = asyncHandler(async (req, res) => {
   const updatedComment = await Comment.findByIdAndUpdate(
     comment?._id,
     {
-      $set: content,
+      $set: {content: content},
     },
     { new: true }
   );
@@ -151,7 +154,7 @@ const deleteComment = asyncHandler(async (req, res) => {
   const { commentId } = req.params;
   const comment = await Comment.findById(commentId);
   if (!comment) {
-    throw new ApiError(404, "Comment not found");
+    throw new ApiError("Comment not found", 400);
   }
   if (comment?.owner.toString() !== req.user?._id.toString()) {
     throw new ApiError(400, "only owner can delete their Comment");

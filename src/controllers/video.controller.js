@@ -6,7 +6,7 @@ import ApiResponse from "../utils/ApiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { uploadOnCloudinary, deleteOnCloudinary } from "../utils/cloudinary.js";
 
-//! GET ALL VIDEOS
+// GET ALL VIDEOS
 const getAllVideos = asyncHandler(async (req, res) => {
   //TODO: get all videos based on query, sort, pagination
   const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
@@ -183,7 +183,7 @@ const getVideoById = asyncHandler(async (req, res) => {
     );
 });
 
-//! UPDATE VIDEO DETAILS
+// UPDATE VIDEO DETAILS
 const updateVideo = asyncHandler(async (req, res) => {
   //TODO: update video details like title, description, thumbnail
   const { videoId } = req.params;
