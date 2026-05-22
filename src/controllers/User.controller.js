@@ -405,6 +405,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
       },
     },
     {
+      // project is used to select the fields that we want to return in the response
       $project: {
         fullName: 1,
         username: 1,
@@ -439,19 +440,25 @@ const getWatchHistory = asyncHandler(async (req, res) => {
       },
     },
     {
+      // from takes the name of the collection which we want to join
+      // localField takes the field from the collection which we want to join
+      // foreignField takes the field from the other collection which we want to join
+      // as takes the name of the new field which will be created in the pipeline
       $lookup: {
-        from: "videos",
-        localField: "watchHistory",
-        foreignField: "_id",
-        as: "watchHistory",
+        from: "videos", // Join the "videos" collection
+        localField: "watchHistory", // Use the user's watchHistory array
+        foreignField: "_id", // Match each watched video ID to videos._id
+        as: "watchHistory", // Store the joined video documents in watchHistory
         pipeline: [
+          // Further process each matched video document
           {
             $lookup: {
-              from: "users",
-              localField: "owner",
-              foreignField: "_id",
-              as: "owner",
-              pipelines: [
+              from: "users", // Join the "users" collection
+              localField: "owner", // Use the owner field from each video
+              foreignField: "_id", // Match owner ID to users._id
+              as: "owner", // Store the joined user(s) in owner
+              pipeline: [
+                // Project only the fields we need for the owner
                 {
                   $project: {
                     fullName: 1,
@@ -459,7 +466,7 @@ const getWatchHistory = asyncHandler(async (req, res) => {
                     avatar: 1,
                   },
                 },
-              ],
+              ],  
             },
           },
           {
