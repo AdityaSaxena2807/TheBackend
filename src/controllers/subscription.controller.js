@@ -21,6 +21,7 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
 const getSubscribedChannels = asyncHandler(async (req, res) => {
   // TODO: controller to return channel list to which user has subscribed
   const { subscriberId } = req.params;
+  
 });
 
 export { toggleSubscription, getUserChannelSubscribers, getSubscribedChannels };
