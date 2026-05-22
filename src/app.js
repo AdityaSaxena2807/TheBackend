@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 //routes import
 import userRouter from "./routes/user.routes.js";
+import tweetRouter from "./routes/tweet.routes.js";
 import errorHandler from "./middlewares/errorHandler.middleware.js";
 //cookie-parser's role is that it allows the server to perform crud operation on the cookies in browser of the client
 

@@ -1,9 +1,9 @@
 import mongoose, { isValidObjectId } from "mongoose";
-import { Tweet } from "../models/tweet.model.js";
-import { User } from "../models/user.model.js";
-import { ApiError } from "../utils/ApiError.js";
-import { ApiResponse } from "../utils/ApiResponse.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
+import { Tweet } from "../models/tweet.models.js";
+import { User } from "../models/user.models.js";
+import ApiError from "../utils/ApiError.js";
+import ApiResponse from "../utils/ApiResponse.js";
+import asyncHandler from "../utils/asyncHandler.js";
 
 //!CREATE TWEET
 const createTweet = asyncHandler(async (req, res) => {
@@ -30,11 +30,78 @@ const createTweet = asyncHandler(async (req, res) => {
 //!GET USER TWEETS
 const getUserTweets = asyncHandler(async (req, res) => {
   // TODO: get user tweets
-  // const { userId } = req.params;
-  // if (!userId) {
-  //   throw new ApiError(400, "user not found");
-  // }
-  // const tweets = await User.aggregate([]);
+  const { userId } = req.params;
+  if (!userId) {
+    throw new ApiError(400, "user not found");
+  }
+  const tweets = await Tweet.aggregate([
+    {
+      $match: {
+        owner: ObjectId("69eb467b109e6a2c49015a00"),
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        as: "ownerDetails",
+        pipeline: [
+          {
+            $project: {
+              username: 1,
+              "avatar.url": 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $lookup: {
+        from: "likes",
+        localField: "_id",
+        foreignField: "tweet",
+        as: "likeDetails",
+        pipeline: [
+          {
+            $project: {
+              tweet: 1,
+              likedBy: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $addFields: {
+        likesCount: {
+          $size: "$likeDetails",
+        },
+        ownerDetails: {
+          $first: "$ownerDetails",
+        },
+        isLiked: {
+          $cond: {
+            if: { $in: ["69eb467b109e6a2c49015a00", "$likeDetails.likedBy"] },
+            then: true,
+            else: false,
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        content: 1,
+        "ownerDetails.username": 1,
+        likesCount: 1,
+        createdAt: 1,
+        isLiked: 1,
+      },
+    },
+  ]);
+  return res
+    .status(200)
+    .json(new ApiResponse(200, tweets, "Tweets fetched successfully"));
 });
 
 //!UPDATE TWEET
