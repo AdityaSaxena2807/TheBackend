@@ -37,7 +37,7 @@ const getUserTweets = asyncHandler(async (req, res) => {
   const tweets = await Tweet.aggregate([
     {
       $match: {
-        owner: ObjectId("69eb467b109e6a2c49015a00"),
+        owner: new mongoose.Types.ObjectId(req.user?._id),
       },
     },
     {
@@ -82,7 +82,12 @@ const getUserTweets = asyncHandler(async (req, res) => {
         },
         isLiked: {
           $cond: {
-            if: { $in: ["69eb467b109e6a2c49015a00", "$likeDetails.likedBy"] },
+            if: {
+              $in: [
+                new mongoose.Types.ObjectId(req.user?._id),
+                "$likeDetails.likedBy",
+              ],
+            },
             then: true,
             else: false,
           },
