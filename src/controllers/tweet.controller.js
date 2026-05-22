@@ -163,6 +163,10 @@ const deleteTweet = asyncHandler(async (req, res) => {
     throw new ApiError(400, "only owner can delete their tweet");
   }
   const deletedTweet = await Tweet.findByIdAndDelete(tweetId);
+  await Like.deleteMany({
+    tweet: tweetId,
+    likedBy: req.user,
+  });
   if (!deletedTweet) {
     throw new ApiError(500, "Failed to delete tweet please try again");
   }
