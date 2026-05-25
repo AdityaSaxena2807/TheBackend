@@ -4,28 +4,82 @@ import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
 
+//! CREATE PLAYLIST
 const createPlaylist = asyncHandler(async (req, res) => {
   //TODO: create playlist
   const { name, description } = req.body;
   if ([name, description].some((field) => field?.trim() === "")) {
-    throw new ApiError(400,"All fields are required");
+    throw new ApiError(400, "All fields are required");
   }
   const playlist = await Playlist.create({
     name,
     description,
+    owner: req.user?._id,
   });
   const createdPlaylist = await Playlist.findById(playlist._id);
   if (!createdPlaylist) {
-    throw new ApiError(400,"Something went wrong while creating playlist");
+    throw new ApiError(400, "Something went wrong while creating playlist");
   }
   return res
     .status(200)
-    .json(new ApiResponse(200,"Playlist created successfully" ));
+    .json(new ApiResponse(200, "Playlist created successfully"));
 });
 
+// ! GET USER PLAYLISTS
 const getUserPlaylists = asyncHandler(async (req, res) => {
   //TODO: get user playlists
   const { userId } = req.params;
+  if (!userId) {
+    throw new ApiError(400, "userId not found");
+  }
+  if (!isValidObjectId(userId)) {
+    throw new ApiError(400, "Invalid userId");
+  }
+  const playlistAggregate = await Playlist.aggregate([
+    {
+      $match: {
+        owner: new mongoose.Types.ObjectId(userId),
+      },
+    },
+    {
+      $lookup: {
+        from: "videos",
+        localField: "videos",
+        foreignField: "_id",
+        as: "videos",
+      },
+    },
+    {
+      $addFields: {
+        totalVideos: {
+          $size: "$videos",
+        },
+        totalViews: {
+          $sum: "$videos.views",
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        name: 1,
+        owner: 1,
+        description: 1,
+        totalVideos: 1,
+        totalViews: 1,
+        updatedAt: 1,
+      },
+    },
+  ]);
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        "User playlists fetched successfully",
+        playlistAggregate
+      )
+    );
 });
 
 const getPlaylistById = asyncHandler(async (req, res) => {
@@ -43,15 +97,67 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
   const { playlistId, videoId } = req.params;
 });
 
+//! DELETE PLAYLIST
 const deletePlaylist = asyncHandler(async (req, res) => {
   // TODO: delete playlist
   const { playlistId } = req.params;
+  if (!isValidObjectId(playlistId)) {
+    throw new ApiError(400, "Invalid playlistId");
+  }
+  const playlist = await Playlist.findById(playlistId);
+  if (!playlist) {
+    throw new ApiError(400, "playlist not found");
+  }
+  if (playlist?.owner.toString() !== req.user?._id.toString()) {
+    throw new ApiError(400, "Only owner can delete their Playlist");
+  }
+  const deletedPlaylist = await Playlist.findByIdAndDelete(playlistId);
+  if (!deletedPlaylist) {
+    throw new ApiError(400, "There was some error while deleting the playlist");
+  }
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, "Playlist deleted successfully", deletedPlaylist)
+    );
 });
 
+// ! UPDATE PLAYLIST
 const updatePlaylist = asyncHandler(async (req, res) => {
   //TODO: update playlist/
   const { playlistId } = req.params;
   const { name, description } = req.body;
+  if ([name, description].some((field) => field?.trim() === "")) {
+    throw new ApiError(400, "All fields are required");
+  }
+  if (!isValidObjectId(playlistId)) {
+    throw new ApiError(400, "Invalid playlistId");
+  }
+  const playlist = await Playlist.findById(playlistId);
+  if (!playlist) {
+    throw new ApiError(400, "playlist not found");
+  }
+  if (playlist?.owner.toString() !== req.user?._id.toString()) {
+    throw new ApiError(400, "Only owner can update their Playlist");
+  }
+  const updatedPlaylist = await Playlist.findByIdAndUpdate(
+    playlistId,
+    {
+      $set: {
+        name: name,
+        description: description,
+      },
+    },
+    { new: true }
+  );
+  if (!updatedPlaylist) {
+    throw new ApiError(400, "There was some error while updating the playlist");
+  }
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, "Playlist updated successfully", updatedPlaylist)
+    );
 });
 
 export {
