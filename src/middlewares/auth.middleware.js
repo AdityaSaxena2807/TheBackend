@@ -12,7 +12,7 @@ export const verifyJWT = asyncHandler(async (req, _, next) => {
     //accessToken is in cookies
 
     if (!token) {
-      throw new ApiError("Unauthorized request", 401);
+      throw new ApiError(401, "Unauthorized request");
     }
 
     const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
@@ -20,11 +20,11 @@ export const verifyJWT = asyncHandler(async (req, _, next) => {
       "-password -refreshToken"
     );
     if (!user) {
-      throw new ApiError("User not found", 404);
+      throw new ApiError(404, "User not found");
     }
     req.user = user;
     next();
   } catch (error) {
-    throw new ApiError(error?.message || "Invalid access token", 401);
+    throw new ApiError(401, error?.message || "Invalid access token");
   }
 });

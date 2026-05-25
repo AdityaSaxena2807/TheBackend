@@ -17,13 +17,13 @@ const publishAVideo = asyncHandler(async (req, res) => {
   // TODO: get video, upload to cloudinary, create video
   const { title, description } = req.body;
   if ([title, description].some((field) => field?.trim() === "")) {
-    throw new ApiError("All fields are required", 400);
+    throw new ApiError(400,"All fields are required");
   }
   const existingVideo = await Video.findOne({ title, description });
   if (existingVideo) {
     throw new ApiError(
-      "Video with same title and same description already exists",
-      409
+      400,
+      "Video with same title and same description already exists"
     );
   }
 
@@ -32,17 +32,17 @@ const publishAVideo = asyncHandler(async (req, res) => {
   console.log("Video path:", videoLocalPath);
   console.log("Thumbnail path:", thumbnailLocalPath);
   if (!videoLocalPath) {
-    throw new ApiError("Video is required", 400);
+    throw new ApiError(400,"Video is required");
   }
   if (!thumbnailLocalPath) {
-    throw new ApiError("Thumbnail Image is required", 400);
+    throw new ApiError(400,"Thumbnail Image is required");
   }
 
   const videoResponse = await uploadOnCloudinary(videoLocalPath);
   const thumbnailResponse = await uploadOnCloudinary(thumbnailLocalPath);
 
   if (!videoResponse || !thumbnailResponse) {
-    throw new ApiError("Failed to upload Video or thumbnail", 500);
+    throw new ApiError(500,"Failed to upload Video or thumbnail");
   }
 
   const video = await Video.create({
@@ -54,7 +54,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
     owner: req.user?._id,
   });
   if (!video) {
-    throw new ApiError("Something went wrong while uploading video", 500);
+    throw new ApiError(500,"Something went wrong while uploading video");
   }
   return res
     .status(201)

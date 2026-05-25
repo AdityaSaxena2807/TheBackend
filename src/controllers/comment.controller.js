@@ -13,7 +13,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10 } = req.query;
   const video = await Video.findById(videoId);
   if (!video) {
-    throw new ApiError(404, "Video not found");
+    throw new ApiError(400, "Video not found");
   }
   //removing the await here because we are using aggregatePaginate which will handle the execution of the aggregate function and pagination together
   const commentsAggregate = Comment.aggregate([
@@ -97,11 +97,11 @@ const addComment = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   const { content } = req.body;
   if (!content) {
-    throw new ApiError("Comment body is missing", 400);
+    throw new ApiError(400, "Comment body is missing");
   }
   const video = await Video.findById(videoId);
   if (!video) {
-    throw new ApiError(404, "Video not found");
+    throw new ApiError(400, "Video not found");
   }
   const comment = await Comment.create({
     content,
@@ -122,19 +122,19 @@ const updateComment = asyncHandler(async (req, res) => {
   const { commentId } = req.params;
   const { content } = req.body;
   if (!content) {
-    throw new ApiError("Comment body is missing", 400);
+    throw new ApiError(400, "Comment body is missing");
   }
   const comment = await Comment.findById(commentId);
   if (!comment) {
-    throw new ApiError(404, "Comment not found");
+    throw new ApiError(400, "Comment not found");
   }
   if (comment?.owner.toString() !== req.user?._id.toString()) {
-    throw new ApiError(400, "only owner can edit their Comment");
+    throw new ApiError(400, "Only owner can edit their Comment");
   }
   const updatedComment = await Comment.findByIdAndUpdate(
     comment?._id,
     {
-      $set: {content: content},
+      $set: { content: content },
     },
     { new: true }
   );
@@ -154,7 +154,7 @@ const deleteComment = asyncHandler(async (req, res) => {
   const { commentId } = req.params;
   const comment = await Comment.findById(commentId);
   if (!comment) {
-    throw new ApiError("Comment not found", 400);
+    throw new ApiError(400, "Comment not found");
   }
   if (comment?.owner.toString() !== req.user?._id.toString()) {
     throw new ApiError(400, "only owner can delete their Comment");

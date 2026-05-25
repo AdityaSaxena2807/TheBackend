@@ -14,7 +14,7 @@ const toggleSubscription = asyncHandler(async (req, res) => {
   }
   const channel = await User.findById(channelId);
   if (!channel) {
-    throw new ApiError("Channel not found", 400);
+    throw new ApiError(400,"Channel not found");
   }
   const alreadySubscribed = await Subscription.findOne({
     channel: channelId,
@@ -40,11 +40,11 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
   // TODO:controller to return subscriber list of a channel
   const { channelId } = req.params;
   if (!isValidObjectId(channelId)) {
-    throw new ApiError("Invalid channelId", 400);
+    throw new ApiError(400,"Invalid channelId");
   }
   const channel = await User.findById(channelId);
   if (!channel) {
-    throw new ApiError("Channel not found", 400);
+    throw new ApiError(400,"Channel not found");
   }
   const subscribersList = await Subscription.aggregate([
     {
@@ -94,11 +94,11 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
   // TODO: controller to return channel list to which user has subscribed
   const { subscriberId } = req.params;
   if (!isValidObjectId(subscriberId)) {
-    throw new ApiError("Invalid subscriberId", 400);
+    throw new ApiError(400,"Invalid subscriberId");
   }
   const subscriber = await User.findById(subscriberId);
   if (!subscriber) {
-    throw new ApiError("Subscriber not found", 400);
+    throw new ApiError(400,"Subscriber not found");
   }
   const channelsList = await Subscription.aggregate([
     {

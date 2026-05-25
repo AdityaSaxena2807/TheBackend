@@ -10,11 +10,11 @@ const createTweet = asyncHandler(async (req, res) => {
   //TODO: create tweet
   const { content } = req.body;
   if (!content) {
-    throw new ApiError("Tweet body is missing", 400);
+    throw new ApiError(400,"Tweet body is missing");
   }
   const existingTweet = await Tweet.findOne({ content });
   if (existingTweet && existingTweet.owner.equals(req.user?._id)) {
-    throw new ApiError("Tweet with same content and owner already exists", 409);
+    throw new ApiError(409,"Tweet with same content and owner already exists");
     //we use 409 status code for conflict error when a resource already exists with the same content and owner
   }
   const tweet = await Tweet.create({
@@ -115,11 +115,11 @@ const updateTweet = asyncHandler(async (req, res) => {
   const { newContent } = req.body;
   const { tweetId } = req.params;
   if (!newContent) {
-    throw new ApiError("New body of tweet is missing", 400);
+    throw new ApiError(400,"New body of tweet is missing");
   }
   // isValidObjectId is a method provided by mongoose to check if the given id is a valid ObjectId or not
   if (!isValidObjectId(tweetId)) {
-    throw new ApiError("Invalid tweet", 400);
+    throw new ApiError(400,"Invalid tweet");
   }
   const tweet = await Tweet.findById(tweetId);
 
@@ -152,7 +152,7 @@ const deleteTweet = asyncHandler(async (req, res) => {
   //TODO: delete tweet
   const { tweetId } = req.params;
   if (!isValidObjectId(tweetId)) {
-    throw new ApiError("Invalid tweet", 400);
+    throw new ApiError(400,"Invalid tweet");
   }
   const tweet = await Tweet.findById(tweetId);
 
