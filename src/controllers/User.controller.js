@@ -4,6 +4,7 @@ import { User } from "../models/user.models.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
 //! Generate Access and Refresh Tokens
 const generateAccessAndRefreshToken = async (userId) => {
@@ -278,7 +279,7 @@ const updateAccount = asyncHandler(async (req, res) => {
   const { fullName, email } = req.body;
   //validate the fields
   if (!fullName || !email) {
-    throw new ApiError(400,"All fields are required");
+    throw new ApiError(400, "All fields are required");
   }
 
   //find the user
@@ -301,15 +302,15 @@ const updateAccount = asyncHandler(async (req, res) => {
 //! UPDATE  AVATAR
 const updateUserAvatar = asyncHandler(async (req, res) => {
   const avatarLocalPath = req.file?.path;
-
+  console.log(req.file.path);
   if (!avatarLocalPath) {
-    throw new ApiError(400,"Avatar is missing");
+    throw new ApiError(400, "Avatar is missing");
   }
   const avatar = await uploadOnCloudinary(avatarLocalPath);
   if (!avatar.url) {
-    throw new ApiError(500,"Something went wrong while uploading Avatar");
+    throw new ApiError(500, "Something went wrong while uploading Avatar");
   }
-  await User.findByIdAndUpdate(
+  const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
       $set: {
@@ -325,17 +326,17 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
 
 //! UPDATE COVER IMAGE
 const updateUserCoverImage = asyncHandler(async (req, res) => {
-  const coverImageLocalPath = req.files?.path;
+  const coverImageLocalPath = req.file?.path;
 
-  if (coverImageLocalPath) {
-    throw new ApiError(400,"Cover Image is missing");
+  if (!coverImageLocalPath) {
+    throw new ApiError(400, "Cover Image is missing");
   }
   const coverImage = await uploadOnCloudinary(coverImageLocalPath);
 
   if (!coverImage.url) {
-    throw new ApiError(400,"Something went wrong while uploading cover image");
+    throw new ApiError(400, "Something went wrong while uploading cover image");
   }
-  await User.findByIdAndUpdate(
+  const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
       $set: {
@@ -353,7 +354,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 const getUserChannelProfile = asyncHandler(async (req, res) => {
   const { username } = req.params;
   if (!username?.trim()) {
-    throw new ApiError(400,"Username is required");
+    throw new ApiError(400, "Username is required");
   }
   const channel = await User.aggregate([
     {
@@ -419,7 +420,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
   ]);
 
   if (!channel?.length) {
-    throw new ApiError(404,"Channel not found");
+    throw new ApiError(404, "Channel not found");
   }
   return res
     .status(200)

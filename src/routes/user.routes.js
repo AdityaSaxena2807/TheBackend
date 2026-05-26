@@ -37,7 +37,7 @@ router.route("/change-password").post(verifyJWT, changeCurrentPassword);
 router.route("/current-user").get(verifyJWT, currentUser);
 router.route("/update-account").patch(verifyJWT, updateAccount);
 router.route("/avatar").patch(verifyJWT, upload.single("avatar"), updateUserAvatar);
-router.route("/cover-image").patch(verifyJWT, upload.single("coverImage"), updateUserCoverImage);
+router.route("/coverImage").patch(verifyJWT, upload.single("coverImage"), updateUserCoverImage);
 // /c/:username this is because we are fetching username as a route param
 router.route("/c/:username").get(verifyJWT, getUserChannelProfile);
 router.route("/watch-history").get(verifyJWT, getWatchHistory);
