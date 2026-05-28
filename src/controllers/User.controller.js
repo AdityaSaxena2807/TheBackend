@@ -72,8 +72,8 @@ const registerUser = asyncHandler(async (req, res) => {
   //upload images to cloudinary
   const avatarResponse = await uploadOnCloudinary(avatarLocalPath);
   const coverImageResponse = await uploadOnCloudinary(coverImageLocalPath);
-  //* console.log("avatarResponse: ", avatarResponse);
-  //* console.log("coverImageResponse: ", coverImageResponse);
+  // console.log("avatarResponse: ", avatarResponse);
+  // console.log("coverImageResponse: ", coverImageResponse);
   if (!avatarResponse || !coverImageResponse) {
     throw new ApiError(500, "Failed to upload images");
   }
