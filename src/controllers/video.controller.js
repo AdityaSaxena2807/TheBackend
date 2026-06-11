@@ -194,7 +194,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
 
   return res.status(200).json(
     // custom API response
-    new ApiResponse(200, video, "Videos fetched successfully")
+    new ApiResponse(200, "Videos fetched successfully", video)
   );
 });
 
@@ -365,7 +365,7 @@ const getVideoById = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(
-      new ApiResponse(200, videoFile[0], "video details fetched successfully")
+      new ApiResponse(200, "video details fetched successfully", videoFile[0])
     );
 });
 
@@ -416,7 +416,7 @@ const updateVideo = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, updatedVideo, "Video updated successfully"));
+    .json(new ApiResponse(200, "Video updated successfully", updatedVideo));
 });
 
 //! DELETE A VIDEO
@@ -444,7 +444,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
   await deleteOnCloudinary(video.videoFile.public_id, "video"); // specify video while deleting video
   return res
     .status(200)
-    .json(new ApiResponse(200, deletedVideo, "Video deleted successfully"));
+    .json(new ApiResponse(200, "Video deleted successfully", deletedVideo));
 });
 
 //! TOGGLE VIDEO PUBLISH STATUS
@@ -474,15 +474,11 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
   if (!status) {
     throw new ApiError(500, "Failed to toggle video publish status");
   }
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        { isPublished: status.isPublished },
-        "Publish status toggled successfully"
-      )
-    );
+  return res.status(200).json(
+    new ApiResponse(200, "Publish status toggled successfully", {
+      isPublished: status.isPublished,
+    })
+  );
 });
 
 export {

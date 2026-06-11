@@ -168,7 +168,7 @@ const getPlaylistById = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(
-      new ApiResponse(200, playlistVideos[0], "playlist fetched successfully")
+      new ApiResponse(200, "playlist fetched successfully", playlistVideos[0])
     );
 });
 
@@ -213,8 +213,8 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
     .json(
       new ApiResponse(
         200,
-        updatedPlaylist,
-        "Added video to playlist successfully"
+        "Added video to playlist successfully",
+        updatedPlaylist
       )
     );
 });
@@ -252,8 +252,8 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
     .json(
       new ApiResponse(
         200,
-        updatedPlaylist,
-        "Removed video from playlist successfully"
+        "Removed video from playlist successfully",
+        updatedPlaylist
       )
     );
 });

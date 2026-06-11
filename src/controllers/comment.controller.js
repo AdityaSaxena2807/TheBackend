@@ -88,7 +88,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, comments, "Comments fetched successfully"));
+    .json(new ApiResponse(200, "Comments fetched successfully", comments));
 });
 
 //!ADD COMMENT TO VIDEO
@@ -113,7 +113,7 @@ const addComment = asyncHandler(async (req, res) => {
   }
   return res
     .status(201)
-    .json(new ApiResponse(201, comment, "Comment added successfully"));
+    .json(new ApiResponse(201, "Comment added successfully", comment));
 });
 
 //!UPDATE COMMENT
@@ -145,7 +145,7 @@ const updateComment = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, updatedComment, "Comment updated successfully"));
+    .json(new ApiResponse(200, "Comment updated successfully", updatedComment));
 });
 
 //!DELETE COMMENT
@@ -173,7 +173,7 @@ const deleteComment = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, oldComment, "Comment deleted successfully"));
+    .json(new ApiResponse(200, "Comment deleted successfully", oldComment));
 });
 
 export { getVideoComments, addComment, updateComment, deleteComment };

@@ -158,15 +158,11 @@ const loginUser = asyncHandler(async (req, res) => {
     .cookie("accessToken", accessToken, Options)
     .cookie("refreshToken", refreshToken, Options)
     .json(
-      new ApiResponse(
-        200,
-        {
-          user: loggedInUser,
-          accessToken,
-          refreshToken,
-        },
-        "User logged in successfully"
-      )
+      new ApiResponse(200, "User logged in successfully", {
+        user: loggedInUser,
+        accessToken,
+        refreshToken,
+      })
     );
 });
 
@@ -188,7 +184,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     .status(200)
     .clearCookie("accessToken", Options)
     .clearCookie("refreshToken", Options)
-    .json(new ApiResponse(200, {}, "User logged out successfully"));
+    .json(new ApiResponse(200, "User logged out successfully", {}));
 });
 
 //! REFRESH ACCESS TOKEN
@@ -234,11 +230,10 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       .cookie("accessToken", accessToken, options)
       .cookie("refreshToken", refreshToken, options)
       .json(
-        new ApiResponse(
-          200,
-          { accessToken, refreshToken },
-          "Access token refreshed successfully"
-        )
+        new ApiResponse(200, "Access token refreshed successfully", {
+          accessToken,
+          refreshToken,
+        })
       );
   } catch (error) {
     throw new ApiError(400, error?.message || "Invalid refresh token");
@@ -270,7 +265,7 @@ const currentUser = asyncHandler(async (req, res) => {
   //using res directly because data is already fetched in auth.middleware.js
   return res
     .status(200)
-    .json(new ApiResponse(200, req.user, "Current user fetched successfully"));
+    .json(new ApiResponse(200, "Current user fetched successfully", req.user));
 });
 
 //! UPDATE ACCOUNT
@@ -296,7 +291,7 @@ const updateAccount = asyncHandler(async (req, res) => {
   ).select("-password -refreshToken");
   return res
     .status(200)
-    .json(new ApiResponse(200, user, "Account details updated successfully"));
+    .json(new ApiResponse(200, "Account details updated successfully", user));
 });
 
 //! UPDATE  AVATAR
@@ -321,7 +316,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
   ).select("-password");
   return res
     .status(200)
-    .json(new ApiResponse(200, user, "Avatar updated successfully"));
+    .json(new ApiResponse(200, "Avatar updated successfully", user));
 });
 
 //! UPDATE COVER IMAGE
@@ -347,7 +342,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
   ).select("-password");
   return res
     .status(200)
-    .json(new ApiResponse(200, user, "Cover Image updated successfully"));
+    .json(new ApiResponse(200, "Cover Image updated successfully", user));
 });
 
 //! GET CURRENT USER PROFILE
@@ -425,7 +420,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(
-      new ApiResponse(200, channel[0], "Channel details fetched successfully")
+      new ApiResponse(200, "Channel details fetched successfully", channel[0])
     );
 });
 
@@ -486,8 +481,8 @@ const getWatchHistory = asyncHandler(async (req, res) => {
     .json(
       new ApiResponse(
         200,
-        user[0].watchHistory,
-        "Watch history fetched successfully"
+        "Watch history fetched successfully",
+        user[0].watchHistory
       )
     );
 });
