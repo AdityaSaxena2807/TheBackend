@@ -35,12 +35,19 @@ const videoSchema = new Schema(
       required: true,
       default: 0,
     },
-    viewedBy: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
+    viewedBy: {
+      userId: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: "User",
+        },
+      ],
+      Ip: [
+        {
+          type: String,
+        },
+      ],
+    },
     isPublished: {
       type: Boolean,
       default: true,

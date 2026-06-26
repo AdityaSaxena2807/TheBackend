@@ -254,9 +254,10 @@ const getVideoById = asyncHandler(async (req, res) => {
   if (!isValidObjectId(videoId)) {
     throw new ApiError(400, "Invalid videoId");
   }
-
-  if (!isValidObjectId(req.user?._id)) {
-    throw new ApiError(400, "Invalid userId");
+  if (req.user?._id) {
+    if (!isValidObjectId(req.user?._id)) {
+      throw new ApiError(400, "Invalid userId");
+    }
   }
   const videoFile = await Video.aggregate([
     {
@@ -344,7 +345,7 @@ const getVideoById = asyncHandler(async (req, res) => {
         description: 1,
         "owner.username": 1,
         likesCount: 1,
-        views:1,
+        views: 1,
         createdAt: 1,
         isLiked: 1,
       },
@@ -354,13 +355,27 @@ const getVideoById = asyncHandler(async (req, res) => {
     throw new ApiError(500, "failed to fetch video");
   }
 
-  // increment views if video fetched successfully
-  await Video.findByIdAndUpdate(videoId, {
-    
-    $inc: {
-      views: 1,
-    },
-  });
+  const ip = req.ip;
+  let updatedVideo;
+
+  if (req.user?._id) {
+    updatedVideo = await Video.findByIdAndUpdate(
+      videoId,
+      { $addToSet: { "viewedBy.userId": req.user._id } },
+      { returnDocument: "after" } // returns the updated doc
+    );
+  } else {
+    updatedVideo = await Video.findByIdAndUpdate(
+      videoId,
+      { $addToSet: { "viewedBy.Ip": ip } },
+      { returnDocument: "after" }
+    );
+  }
+
+  const viewCount =
+    updatedVideo.viewedBy.userId.length + updatedVideo.viewedBy.Ip.length;
+
+  await Video.findByIdAndUpdate(videoId, { views: viewCount });
 
   // add this video to user watch history
   await User.findByIdAndUpdate(req.user?._id, {
