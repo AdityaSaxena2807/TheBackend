@@ -35,6 +35,12 @@ const videoSchema = new Schema(
       required: true,
       default: 0,
     },
+    viewedBy: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
     isPublished: {
       type: Boolean,
       default: true,
@@ -43,5 +49,6 @@ const videoSchema = new Schema(
   { timestamps: true }
 );
 videoSchema.plugin(mongooseAggregatePaginate);
-
+// here plugin is used to paginate the videos when fetching them from the database. It allows for efficient querying
+// and retrieval of video data in a paginated format, which is especially useful when dealing with large datasets.
 export const Video = mongoose.model("Video", videoSchema);

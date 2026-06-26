@@ -51,3 +51,4 @@ a route /register in userRouter, then it will be accessed as /api/v1/users/regis
 //* so the link will look like this: http://localhost:8000/api/v1/users/register
 **/
 export default app;
+//mongodb+srv://saxenaaditya2807_db_user:Password123@cluster0.oc4rehb.mongodb.net/

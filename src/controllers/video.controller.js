@@ -236,7 +236,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
     description,
     videoFile: videoResponse?.url || "",
     thumbnail: thumbnailResponse?.url || "",
-    duration: videoResponse?.duration || "",
+    duration: Math.round(videoResponse?.duration) || "",
     owner: req.user?._id,
   });
   if (!video) {
@@ -281,11 +281,16 @@ const getVideoById = asyncHandler(async (req, res) => {
                 {
                   $addFields: {
                     subscribersCount: {
-                      $size: "$subscribers",
+                      $size: { $ifNull: ["$subscribers", []] },
                     },
                     isSubscribed: {
                       $cond: {
-                        if: { $in: [req.user?._id, "$subscribers.subscriber"] },
+                        if: {
+                          $in: [
+                            req.user?._id,
+                            { $ifNull: ["$subscribers.subscriber", []] },
+                          ],
+                        },
                         then: true,
                         else: false,
                       },
@@ -339,6 +344,7 @@ const getVideoById = asyncHandler(async (req, res) => {
         description: 1,
         "owner.username": 1,
         likesCount: 1,
+        views:1,
         createdAt: 1,
         isLiked: 1,
       },
@@ -350,6 +356,7 @@ const getVideoById = asyncHandler(async (req, res) => {
 
   // increment views if video fetched successfully
   await Video.findByIdAndUpdate(videoId, {
+    
     $inc: {
       views: 1,
     },
