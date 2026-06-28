@@ -141,7 +141,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
               username: 1,
 
               // include avatar url only
-              "avatar.url": 1,
+              avatar: 1,
             },
           },
         ],
@@ -278,33 +278,24 @@ const getVideoById = asyncHandler(async (req, res) => {
               localField: "_id",
               foreignField: "channel",
               as: "subscribers",
-              pipeline: [
-                {
-                  $addFields: {
-                    subscribersCount: {
-                      $size: { $ifNull: ["$subscribers", []] },
-                    },
-                    isSubscribed: {
-                      $cond: {
-                        if: {
-                          $in: [
-                            req.user?._id,
-                            { $ifNull: ["$subscribers.subscriber", []] },
-                          ],
-                        },
-                        then: true,
-                        else: false,
-                      },
-                    },
-                  },
+            },
+          },
+          {
+            $addFields: {
+              subscribersCount: { $size: "$subscribers" },
+              isSubscribed: {
+                $cond: {
+                  if: { $in: [req.user?._id, "$subscribers.subscriber"] },
+                  then: true,
+                  else: false,
                 },
-              ],
+              },
             },
           },
           {
             $project: {
               username: 1,
-              "avatar.url": 1,
+              avatar: 1,
               subscribersCount: 1,
               isSubscribed: 1,
             },
@@ -344,6 +335,9 @@ const getVideoById = asyncHandler(async (req, res) => {
         title: 1,
         description: 1,
         "owner.username": 1,
+        "owner.avatar": 1,
+        "owner.subscribersCount": 1,
+        "owner.isSubscribed": 1,
         likesCount: 1,
         views: 1,
         createdAt: 1,
