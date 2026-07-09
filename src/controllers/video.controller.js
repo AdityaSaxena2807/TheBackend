@@ -294,6 +294,7 @@ const getVideoById = asyncHandler(async (req, res) => {
           },
           {
             $project: {
+              _id: 1,
               username: 1,
               avatar: 1,
               subscribersCount: 1,
@@ -334,6 +335,7 @@ const getVideoById = asyncHandler(async (req, res) => {
         thumbnail: 1,
         title: 1,
         description: 1,
+        "owner._id": 1,
         "owner.username": 1,
         "owner.avatar": 1,
         "owner.subscribersCount": 1,
