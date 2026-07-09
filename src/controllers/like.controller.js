@@ -23,7 +23,13 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
   });
   if (likedAlready) {
     await Like.findByIdAndDelete(likedAlready?._id);
-    return res.status(200).json(new ApiResponse(200, { isLiked: false }));
+    const likesCount = await Like.countDocuments({ video: videoId });
+    return res.status(200).json(
+      new ApiResponse(200, "Video has been unliked", {
+        isLiked: false,
+        likesCount,
+      })
+    );
   }
   await Like.create({
     likedOn: "video",
@@ -31,9 +37,12 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
     likedBy: req.user._id,
   });
   const likesCount = await Like.countDocuments({ video: videoId });
-  return res
-    .status(200)
-    .json(new ApiResponse(200, { isLiked: true, likesCount }));
+  return res.status(200).json(
+    new ApiResponse(200, "Video liked successfully", {
+      isLiked: true,
+      likesCount,
+    })
+  );
 });
 
 //! TOGGLE LIKE ON COMMENT
@@ -53,7 +62,13 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
   });
   if (likedAlready) {
     await Like.findByIdAndDelete(likedAlready?._id);
-    return res.status(200).json(new ApiResponse(200, { isLiked: false }));
+    const likesCount = await Like.countDocuments({ comment: commentId });
+    return res.status(200).json(
+      new ApiResponse(200, "Comment has been unliked", {
+        isLiked: false,
+        likesCount,
+      })
+    );
   }
   await Like.create({
     comment: commentId,
@@ -61,9 +76,12 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
     likedOn: "comment",
   });
   const likesCount = await Like.countDocuments({ comment: commentId });
-  return res
-    .status(200)
-    .json(new ApiResponse(200, { isLiked: true, likesCount }));
+  return res.status(200).json(
+    new ApiResponse(200, "Comment liked successfully", {
+      isLiked: true,
+      likesCount,
+    })
+  );
 });
 
 //! TOGGLE LIKE ON TWEET
@@ -83,7 +101,13 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
   });
   if (likedAlready) {
     await Like.findByIdAndDelete(likedAlready?._id);
-    return res.status(200).json(new ApiResponse(200, { isLiked: false }));
+    const likesCount = await Like.countDocuments({ tweet: tweetId });
+    return res.status(200).json(
+      new ApiResponse(200, "Tweet has been unliked", {
+        isLiked: false,
+        likesCount,
+      })
+    );
   }
   await Like.create({
     tweet: tweetId,
@@ -91,9 +115,12 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
     likedOn: "tweet",
   });
   const likesCount = await Like.countDocuments({ tweet: tweetId });
-  return res
-    .status(200)
-    .json(new ApiResponse(200, { isLiked: true, likesCount }));
+  return res.status(200).json(
+    new ApiResponse(200, "Tweet liked successfully", {
+      isLiked: true,
+      likesCount,
+    })
+  );
 });
 
 //! GET ALL LIKED VIDEOS
