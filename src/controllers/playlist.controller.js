@@ -201,7 +201,7 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
         videos: videoId,
       },
     },
-    { new: true }
+    { returnDocument: "after" }
   );
 
   if (!updatedPlaylist) {
@@ -244,7 +244,7 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
         videos: videoId,
       },
     },
-    { new: true }
+    { returnDocument: "after" }
   );
 
   return res
@@ -309,7 +309,7 @@ const updatePlaylist = asyncHandler(async (req, res) => {
         description: description,
       },
     },
-    { new: true }
+    { returnDocument: "after" }
   );
   if (!updatedPlaylist) {
     throw new ApiError(400, "There was some error while updating the playlist");

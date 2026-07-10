@@ -70,10 +70,11 @@ const getVideoComments = asyncHandler(async (req, res) => {
         content: 1,
         createdAt: 1,
         likesCount: 1,
-        owner: {
+        ownerDetails: {
+          _id: 1,
           username: 1,
           fullName: 1,
-          "avatar.url": 1,
+          avatar: 1,
         },
         isLiked: 1,
       },
@@ -103,6 +104,7 @@ const addComment = asyncHandler(async (req, res) => {
   if (!video) {
     throw new ApiError(400, "Video not found");
   }
+
   const comment = await Comment.create({
     content,
     video: videoId,
@@ -111,9 +113,19 @@ const addComment = asyncHandler(async (req, res) => {
   if (!comment) {
     throw new ApiError(500, "Failed to add comment please try again");
   }
+  const populatedComment = await Comment.findById(comment._id).populate(
+    "owner",
+    "_id username fullName avatar"
+  );
+
+  const commentObj = populatedComment.toObject();
+
+  commentObj.ownerDetails = commentObj.owner;
+  delete commentObj.owner;
+
   return res
     .status(201)
-    .json(new ApiResponse(201, "Comment added successfully", comment));
+    .json(new ApiResponse(201, "Comment added successfully", commentObj));
 });
 
 //!UPDATE COMMENT
@@ -136,7 +148,7 @@ const updateComment = asyncHandler(async (req, res) => {
     {
       $set: { content: content },
     },
-    { new: true }
+    { returnDocument: "after" }
   );
 
   if (!updatedComment) {

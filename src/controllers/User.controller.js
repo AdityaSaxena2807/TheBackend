@@ -173,7 +173,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     //unset is used to remove the field from the document by passing a flag(1) or true for the field to be removed
     { $unset: { refreshToken: 1 } },
     //new is used to return the updated document
-    { new: true }
+    { returnDocument: "after" }
   );
 
   const Options = {
@@ -190,7 +190,7 @@ const logoutUser = asyncHandler(async (req, res) => {
 //! REFRESH ACCESS TOKEN
 const refreshAccessToken = asyncHandler(async (req, res) => {
   const incomingRefreshToken =
-    req.cookies.refreshToken || req.body.refreshToken;
+    req.cookies?.refreshToken || req.body?.refreshToken;
   if (!incomingRefreshToken) {
     throw new ApiError(401, "Unauthorized request");
   }
@@ -286,7 +286,7 @@ const updateAccount = asyncHandler(async (req, res) => {
         email: email,
       },
     },
-    { new: true }
+    { returnDocument: "after" }
     //new: true means that the updated document will be returned
   ).select("-password -refreshToken");
   return res
@@ -312,7 +312,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
         avatar: avatar.url,
       },
     },
-    { new: true }
+    { returnDocument: "after" }
   ).select("-password");
   return res
     .status(200)
@@ -338,7 +338,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
         coverImage: coverImage.url,
       },
     },
-    { new: true }
+    { returnDocument: "after" }
   ).select("-password");
   return res
     .status(200)

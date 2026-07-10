@@ -425,7 +425,7 @@ const updateVideo = asyncHandler(async (req, res) => {
         thumbnail: thumbnail.url,
       },
     },
-    { new: true }
+    { returnDocument: "after" }
   );
 
   if (!updatedVideo) {

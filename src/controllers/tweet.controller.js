@@ -135,7 +135,7 @@ const updateTweet = asyncHandler(async (req, res) => {
     {
       $set: { content: newContent },
     },
-    { new: true }
+    { returnDocument: "after" }
   );
 
   if (!newTweet) {
