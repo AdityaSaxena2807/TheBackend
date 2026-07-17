@@ -14,6 +14,7 @@ import {
 } from "../controllers/User.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { optionalAuth } from "../middlewares/noAuth.middleware.js";
 const router = Router();
 
 router.route("/register").post(
@@ -39,6 +40,6 @@ router.route("/update-account").patch(verifyJWT, updateAccount);
 router.route("/avatar").patch(verifyJWT, upload.single("avatar"), updateUserAvatar);
 router.route("/coverImage").patch(verifyJWT, upload.single("coverImage"), updateUserCoverImage);
 // /c/:username this is because we are fetching username as a route param
-router.route("/c/:username").get(verifyJWT, getUserChannelProfile);
+router.route("/c/:username").get(optionalAuth, getUserChannelProfile);
 router.route("/watch-history").get(verifyJWT, getWatchHistory);
 export default router;

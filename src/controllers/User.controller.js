@@ -345,7 +345,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "Cover Image updated successfully", user));
 });
 
-//! GET CURRENT USER PROFILE
+//! GET USER CHANNEL PROFILE
 const getUserChannelProfile = asyncHandler(async (req, res) => {
   const { username } = req.params;
   if (!username?.trim()) {
@@ -387,12 +387,12 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
         channelsSubscribedToCount: {
           $size: "$subscribedTo", //returns the number of channels the user is subscribed to
         },
+        //it is used to check if the user is subscribed to the channel
+        //$in is used to check if the first argument is present in the second argument
         isSubscribed: {
           $cond: {
             if: {
-              //it is used to check if the user is subscribed to the channel
-              //$in is used to check if the first argument is present in the second argument
-              $in: ["req.user?._id", "$subscribers.subscriber"],
+              $in: [req.user?._id, "$subscribers.subscriber"],
             },
             then: true,
             else: false,
