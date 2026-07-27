@@ -27,7 +27,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
   // MongoDB will execute stages one by one
   const pipeline = [];
 
-  // ======================================================
+  // ======================================================`
   // SEARCH FUNCTIONALITY
   // ======================================================
 

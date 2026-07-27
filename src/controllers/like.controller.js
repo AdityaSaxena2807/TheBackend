@@ -132,7 +132,7 @@ const getLikedVideos = asyncHandler(async (req, res) => {
   const likesAggregate = await Like.aggregate([
     {
       $match: {
-        //likedBy: new mongoose.Types.ObjectId(req.user._id),
+        likedBy: new mongoose.Types.ObjectId(req.user._id),
         //Above is used when we want to extract all liked videos by current user
 
         likedOn: "video",
