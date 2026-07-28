@@ -136,7 +136,7 @@ const getLikedVideos = asyncHandler(async (req, res) => {
         //Above is used when we want to extract all liked videos by current user
 
         likedOn: "video",
-        //Above is used when we want to extract all liked videos by all users
+        // filters to only video likes (as opposed to comment/tweet likes)
       },
     },
     {
@@ -164,6 +164,11 @@ const getLikedVideos = asyncHandler(async (req, res) => {
       $unwind: "$likedVideo",
     },
     {
+      $match: {
+        "likedVideo.isPublished": true,
+      },
+    },
+    {
       $sort: {
         createdAt: -1,
       },
@@ -174,8 +179,8 @@ const getLikedVideos = asyncHandler(async (req, res) => {
         likedBy: 1,
         likedVideo: {
           _id: 1,
-          "videoFile.url": 1,
-          "thumbnail.url": 1,
+          videoFile: 1,
+          thumbnail: 1,
           owner: 1,
           title: 1,
           description: 1,
@@ -186,7 +191,7 @@ const getLikedVideos = asyncHandler(async (req, res) => {
           ownerDetails: {
             username: 1,
             fullName: 1,
-            "avatar.url": 1,
+            avatar: 1,
           },
         },
       },
