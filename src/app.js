@@ -22,9 +22,9 @@ app.use(
   })
 );
 //this app.use is used for middlewares and configurations of the app
-app.use(express.json({ limit: "1gb" }));
-//this means i am accepting json data in the request body and the limit is 1gb
-app.use(express.urlencoded({ extended: true, limit: "1gb" }));
+app.use(express.json({ limit: "100mb" }));
+//this means i am accepting json data in the request body and the limit is 100mb
+app.use(express.urlencoded({ extended: true, limit: "100mb" }));
 //this means i am accepting urlencoded data in the request body and
 // extended: true means that i can accept nested objects in the urlencoded data
 app.use(express.static("public"));

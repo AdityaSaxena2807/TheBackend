@@ -17,6 +17,12 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
   if (!video) {
     throw new ApiError(404, "Video not found");
   }
+  if (
+    video.visibility === "private" &&
+    video.owner.toString() !== req.user._id.toString()
+  ) {
+    throw new ApiError(403, "This video is private");
+  }
   const likedAlready = await Like.findOne({
     video: videoId,
     likedBy: req.user._id,
@@ -50,11 +56,23 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
   //TODO: toggle like on comment
   const { commentId } = req.params;
   if (!isValidObjectId(commentId)) {
-    throw new ApiError(400, "Invalid videoId");
+    throw new ApiError(400, "Invalid commentId");
   }
   const comment = await Comment.findById(commentId);
   if (!comment) {
     throw new ApiError(404, "Comment not found");
+  }
+  const video = await Video.findById(comment.video).select("visibility owner");
+
+  if (!video) {
+    throw new ApiError(404, "Video not found");
+  }
+
+  if (
+    video.visibility === "private" &&
+    video.owner.toString() !== req.user._id.toString()
+  ) {
+    throw new ApiError(403, "This video is private");
   }
   const likedAlready = await Like.findOne({
     comment: commentId,
@@ -166,6 +184,10 @@ const getLikedVideos = asyncHandler(async (req, res) => {
     {
       $match: {
         "likedVideo.isPublished": true,
+        $or: [
+          { "likedVideo.visibility": "public" },
+          { "likedVideo.owner": new mongoose.Types.ObjectId(req.user._id) },
+        ],
       },
     },
     {

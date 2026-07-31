@@ -1,6 +1,8 @@
 import mongoose, { isValidObjectId } from "mongoose";
 import { Video } from "../models/video.models.js";
 import { User } from "../models/user.models.js";
+import { Like } from "../models/like.models.js";
+import { Comment } from "../models/comment.models.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
@@ -74,16 +76,18 @@ const getAllVideos = asyncHandler(async (req, res) => {
   }
 
   // ======================================================
-  // FETCH ONLY PUBLISHED VIDEOS
+  // FETCH ONLY PUBLISHED VIDEOS AND FILTER BY VISIBILITY
   // ======================================================
 
-  // only return videos where isPublished is true
   pipeline.push({
     $match: {
       isPublished: true,
+      $or: [
+        { visibility: "public" },
+        { owner: new mongoose.Types.ObjectId(req.user?._id) },
+      ],
     },
   });
-
   // ======================================================
   // SORTING
   // ======================================================
@@ -201,8 +205,8 @@ const getAllVideos = asyncHandler(async (req, res) => {
 //! PUBLISH A VIDEO
 const publishAVideo = asyncHandler(async (req, res) => {
   // TODO: get video, upload to cloudinary, create video
-  const { title, description } = req.body;
-  if ([title, description].some((field) => field?.trim() === "")) {
+  const { title, description, visibility } = req.body;
+  if ([title, description, visibility].some((field) => field?.trim() === "")) {
     throw new ApiError(400, "All fields are required");
   }
   const existingVideo = await Video.findOne({ title, description });
@@ -238,6 +242,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
     thumbnail: thumbnailResponse?.url || "",
     duration: Math.round(videoResponse?.duration) || "",
     owner: req.user?._id,
+    visibility: visibility === "private" ? "private" : "public",
   });
   if (!video) {
     throw new ApiError(500, "Something went wrong while uploading video");
@@ -367,7 +372,16 @@ const getVideoById = asyncHandler(async (req, res) => {
       { returnDocument: "after" }
     );
   }
-
+  if (videoFile[0].owner?._id?.toString() !== req.user?._id?.toString()) {
+    // only re-check visibility for non-owners; owner should always see their own video
+    const rawVideo = await Video.findById(videoId).select("visibility owner");
+    if (
+      rawVideo.visibility === "private" &&
+      rawVideo.owner.toString() !== req.user?._id?.toString()
+    ) {
+      throw new ApiError(403, "This video is private");
+    }
+  }
   const viewCount =
     updatedVideo.viewedBy.userId.length + updatedVideo.viewedBy.Ip.length;
 

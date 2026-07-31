@@ -446,6 +446,15 @@ const getWatchHistory = asyncHandler(async (req, res) => {
         foreignField: "_id", // Match each watched video ID to videos._id
         as: "watchHistory", // Store the joined video documents in watchHistory
         pipeline: [
+          {
+            $match: {
+              isPublished: true,
+              $or: [
+                { visibility: "public" },
+                { owner: new mongoose.Types.ObjectId(req.user?._id) },
+              ],
+            },
+          },
           // Further process each matched video document
           {
             $lookup: {

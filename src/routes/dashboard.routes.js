@@ -7,9 +7,9 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { optionalAuth } from "../middlewares/noAuth.middleware.js";
 
 const router = Router();
-router.use(optionalAuth); // Apply optionalAuth middleware to all routes in this file
+//router.use(optionalAuth); // Apply optionalAuth middleware to all routes in this file
 
-//router.use(verifyJWT);
+router.use(verifyJWT);
 // Apply verifyJWT middleware to all routes in this file
 
 router.route("/stats").get(getChannelStats);

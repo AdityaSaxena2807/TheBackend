@@ -86,7 +86,6 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
 });
 
 // ! GET PLAYLIST BY ID
-// ! GET PLAYLIST BY ID
 const getPlaylistById = asyncHandler(async (req, res) => {
   //TODO: get playlist by id
   const { playlistId } = req.params;
@@ -117,6 +116,10 @@ const getPlaylistById = asyncHandler(async (req, res) => {
           {
             $match: {
               isPublished: true,
+              $or: [
+                { visibility: "public" },
+                { owner: new mongoose.Types.ObjectId(req.user?._id) },
+              ],
             },
           },
         ],
