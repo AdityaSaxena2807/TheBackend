@@ -27,11 +27,11 @@ const generateAccessAndRefreshToken = async (userId) => {
 
 //! REGISTER USER
 /** 
- take user details (from frontend)
- validate them
- check if no required field is empty
- when enter is clicked check if user already exists or not
- //check for images, check for avatar
+ //*take user details (from frontend)
+ //*validate them
+ //*check if no required field is empty
+ //*when enter is clicked check if user already exists or not
+ //*check for images, check for avatar
  //*upload them to cloudinary
  //* create user object - create entry in db
  //*remove password and refresh token field from response
