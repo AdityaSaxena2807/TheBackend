@@ -16,16 +16,108 @@ const createTweet = asyncHandler(async (req, res) => {
   const existingTweet = await Tweet.findOne({ content });
   if (existingTweet && existingTweet.owner.equals(req.user?._id)) {
     throw new ApiError(409, "Tweet with same content and owner already exists");
-    //we use 409 status code for conflict error when a resource already exists with the same content and owner
   }
   const tweet = await Tweet.create({
     content,
     owner: req.user?._id,
-    //we dont take owner from req.body because we want to set the owner of the tweet to the user who is creating the tweet and we can get the user from the req.user object which is set by the verifyJWT middleware
   });
+
+  const populatedTweet = await Tweet.findById(tweet._id).populate(
+    "owner",
+    "username avatar"
+  );
+
+  const responseTweet = {
+    _id: populatedTweet._id,
+    content: populatedTweet.content,
+    owner: populatedTweet.owner._id,
+    createdAt: populatedTweet.createdAt,
+    ownerDetails: {
+      _id: populatedTweet.owner._id,
+      username: populatedTweet.owner.username,
+      avatar: populatedTweet.owner.avatar,
+    },
+    likesCount: 0,
+    isLiked: false,
+  };
+
   return res
     .status(201)
-    .json(new ApiResponse(201, "Tweet created successfully", tweet));
+    .json(new ApiResponse(201, "Tweet created successfully", responseTweet));
+});
+
+//!GET ALL TWEETS
+const getAllTweets = asyncHandler(async (req, res) => {
+  const tweets = await Tweet.aggregate([
+    {
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        as: "ownerDetails",
+        pipeline: [
+          {
+            $project: {
+              username: 1,
+              avatar: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $lookup: {
+        from: "likes",
+        localField: "_id",
+        foreignField: "tweet",
+        as: "likeDetails",
+        pipeline: [
+          {
+            $project: {
+              tweet: 1,
+              likedBy: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $addFields: {
+        likesCount: { $size: "$likeDetails" },
+        ownerDetails: { $first: "$ownerDetails" },
+        isLiked: {
+          $cond: {
+            if: {
+              $in: [
+                req.user?._id
+                  ? new mongoose.Types.ObjectId(req.user._id)
+                  : null,
+                "$likeDetails.likedBy",
+              ],
+            },
+            then: true,
+            else: false,
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        content: 1,
+        owner: 1,
+        "ownerDetails._id": 1,
+        "ownerDetails.username": 1,
+        "ownerDetails.avatar": 1,
+        likesCount: 1,
+        createdAt: 1,
+        isLiked: 1,
+      },
+    },
+    { $sort: { createdAt: -1 } },
+  ]);
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Tweets fetched successfully", tweets));
 });
 
 //!GET USER TWEETS
@@ -35,10 +127,13 @@ const getUserTweets = asyncHandler(async (req, res) => {
   if (!userId) {
     throw new ApiError(400, "user not found");
   }
+  if (!isValidObjectId(userId)) {
+    throw new ApiError(400, "Invalid userId");
+  }
   const tweets = await Tweet.aggregate([
     {
       $match: {
-        owner: new mongoose.Types.ObjectId(req.user?._id),
+        owner: new mongoose.Types.ObjectId(userId),
       },
     },
     {
@@ -85,7 +180,9 @@ const getUserTweets = asyncHandler(async (req, res) => {
           $cond: {
             if: {
               $in: [
-                new mongoose.Types.ObjectId(req.user?._id),
+                req.user?._id
+                  ? new mongoose.Types.ObjectId(req.user._id)
+                  : null,
                 "$likeDetails.likedBy",
               ],
             },
@@ -176,4 +273,4 @@ const deleteTweet = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "Tweet deleted successfully", deletedTweet));
 });
 
-export { createTweet, getUserTweets, updateTweet, deleteTweet };
+export { createTweet, getUserTweets, updateTweet, deleteTweet, getAllTweets };

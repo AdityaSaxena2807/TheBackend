@@ -23,6 +23,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
     sortBy, // field name to sort by
     sortType, // asc or desc
     userId, // fetch videos of specific user
+    channelIds, // comma-separated list of channel/owner IDs (subscriptions feed)
   } = req.query;
 
   // empty aggregation pipeline array
@@ -35,21 +36,30 @@ const getAllVideos = asyncHandler(async (req, res) => {
 
   // check if search query exists
   if (query) {
-    // add Atlas Full Text Search stage
     pipeline.push({
-      // MongoDB Atlas search stage
       $search: {
-        // name of Atlas Search index
-        index: "search-videos",
-
-        // text search configuration
-        text: {
-          // text entered by user
-          query: query,
-
-          // fields in which search will happen
-          // search only in title and description
-          path: ["title", "description"],
+        index: "videos_search",
+        compound: {
+          should: [
+            {
+              autocomplete: {
+                query,
+                path: "title",
+                score: {
+                  boost: {
+                    value: 5,
+                  },
+                },
+              },
+            },
+            {
+              autocomplete: {
+                query,
+                path: "description",
+              },
+            },
+          ],
+          minimumShouldMatch: 1,
         },
       },
     });
@@ -73,6 +83,26 @@ const getAllVideos = asyncHandler(async (req, res) => {
         owner: new mongoose.Types.ObjectId(userId),
       },
     });
+  }
+
+  // ======================================================
+  // FILTER BY MULTIPLE CHANNEL IDS (subscriptions feed)
+  // ======================================================
+
+  if (channelIds) {
+    // channelIds arrives as a comma-separated string, e.g. "id1,id2,id3"
+    const idArray = channelIds
+      .split(",")
+      .filter((id) => isValidObjectId(id))
+      .map((id) => new mongoose.Types.ObjectId(id));
+
+    if (idArray.length > 0) {
+      pipeline.push({
+        $match: {
+          owner: { $in: idArray },
+        },
+      });
+    }
   }
 
   // ======================================================
