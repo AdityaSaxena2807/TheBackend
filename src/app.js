@@ -17,14 +17,14 @@ import errorHandler from "./middlewares/errorHandler.middleware.js";
 const app = express();
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: process.env.CORS_ORIGIN,
     credentials: true,
   })
 );
 //this app.use is used for middlewares and configurations of the app
-app.use(express.json({ limit: "100mb" }));
-//this means i am accepting json data in the request body and the limit is 100mb
-app.use(express.urlencoded({ extended: true, limit: "100mb" }));
+app.use(express.json({ limit: "10mb" }));
+//this means i am accepting json data in the request body and the limit is 10mb
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 //this means i am accepting urlencoded data in the request body and
 // extended: true means that i can accept nested objects in the urlencoded data
 app.use(express.static("public"));
@@ -51,4 +51,12 @@ a route /register in userRouter, then it will be accessed as /api/v1/users/regis
 //* so the link will look like this: http://localhost:8000/api/v1/users/register
 **/
 export default app;
-//mongodb+srv://saxenaaditya2807_db_user:Password123@cluster0.oc4rehb.mongodb.net/
+//! mongodb+srv://Aditya:Aditya123@cluster1.rff7t0w.mongodb.net
+//! CLOUDINARY_CLOUD_NAME=adityayt   
+//! CLOUDINARY_API_KEY=792518714555228
+//! CLOUDINARY_API_SECRET=ahqsn8ggCwvtQeq5w0wY13Jb67I
+
+//! mongodb+srv://saxenaaditya2807_db_user:Password123@cluster0.oc4rehb.mongodb.net/
+//! CLOUDINARY_CLOUD_NAME=duckyyyt   
+//! CLOUDINARY_API_KEY=219658648964972
+//! CLOUDINARY_API_SECRET=1J8TIizZpVTquSBX4KHNYAfKqtE
