@@ -83,8 +83,15 @@ const registerUser = asyncHandler(async (req, res) => {
     fullName,
     email,
     username: username.toLowerCase(),
-    avatar: avatarResponse?.url || "",
-    coverImage: coverImageResponse?.url || "",
+    avatar: {
+      url: avatarResponse.url,
+      public_id: avatarResponse.public_id,
+    },
+
+    coverImage: {
+      url: coverImageResponse.url,
+      public_id: coverImageResponse.public_id,
+    },
     password,
   });
   //remove password and refresh token from the response while checking for user creation
@@ -151,7 +158,8 @@ const loginUser = asyncHandler(async (req, res) => {
   //secure is used to set the cookie to be secure
   const Options = {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   };
   return res
     .status(200)
@@ -178,7 +186,8 @@ const logoutUser = asyncHandler(async (req, res) => {
 
   const Options = {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   };
   return res
     .status(200)
@@ -219,7 +228,8 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
     const options = {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     };
     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
       user._id
@@ -297,23 +307,40 @@ const updateAccount = asyncHandler(async (req, res) => {
 //! UPDATE  AVATAR
 const updateUserAvatar = asyncHandler(async (req, res) => {
   const avatarLocalPath = req.file?.path;
-  console.log(req.file.path);
+
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar is missing");
   }
+
+  // Get current user
+  const currentUser = await User.findById(req.user._id);
+
   const avatar = await uploadOnCloudinary(avatarLocalPath);
-  if (!avatar.url) {
+
+  if (!avatar?.url) {
     throw new ApiError(500, "Something went wrong while uploading Avatar");
   }
+
+  // Delete old avatar AFTER new upload succeeds
+  if (currentUser?.avatar?.public_id) {
+    await deleteOnCloudinary(currentUser.avatar.public_id);
+  }
+
   const user = await User.findByIdAndUpdate(
-    req.user?._id,
+    req.user._id,
     {
       $set: {
-        avatar: avatar.url,
+        avatar: {
+          url: avatar.url,
+          public_id: avatar.public_id,
+        },
       },
     },
-    { returnDocument: "after" }
+    {
+      returnDocument: "after",
+    }
   ).select("-password");
+
   return res
     .status(200)
     .json(new ApiResponse(200, "Avatar updated successfully", user));
@@ -326,20 +353,34 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
   if (!coverImageLocalPath) {
     throw new ApiError(400, "Cover Image is missing");
   }
+
+  const currentUser = await User.findById(req.user._id);
+
   const coverImage = await uploadOnCloudinary(coverImageLocalPath);
 
-  if (!coverImage.url) {
+  if (!coverImage?.url) {
     throw new ApiError(400, "Something went wrong while uploading cover image");
   }
+
+  if (currentUser?.coverImage?.public_id) {
+    await deleteOnCloudinary(currentUser.coverImage.public_id);
+  }
+
   const user = await User.findByIdAndUpdate(
-    req.user?._id,
+    req.user._id,
     {
       $set: {
-        coverImage: coverImage.url,
+        coverImage: {
+          url: coverImage.url,
+          public_id: coverImage.public_id,
+        },
       },
     },
-    { returnDocument: "after" }
+    {
+      returnDocument: "after",
+    }
   ).select("-password");
+
   return res
     .status(200)
     .json(new ApiResponse(200, "Cover Image updated successfully", user));

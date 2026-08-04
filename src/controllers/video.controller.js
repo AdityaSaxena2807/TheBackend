@@ -268,9 +268,15 @@ const publishAVideo = asyncHandler(async (req, res) => {
   const video = await Video.create({
     title,
     description,
-    videoFile: videoResponse?.url || "",
-    thumbnail: thumbnailResponse?.url || "",
-    duration: Math.round(videoResponse?.duration) || "",
+    videoFile: {
+      url: videoResponse.url,
+      public_id: videoResponse.public_id,
+    },
+    thumbnail: {
+      url: thumbnailResponse.url,
+      public_id: thumbnailResponse.public_id,
+    },
+    duration: Math.round(videoResponse.duration) || "",
     owner: req.user?._id,
     visibility: visibility === "private" ? "private" : "public",
   });
@@ -383,7 +389,17 @@ const getVideoById = asyncHandler(async (req, res) => {
     },
   ]);
   if (!videoFile || videoFile.length === 0) {
-    throw new ApiError(500, "failed to fetch video");
+    throw new ApiError(404, "Video not found");
+  }
+  if (videoFile[0].owner?._id?.toString() !== req.user?._id?.toString()) {
+    const rawVideo = await Video.findById(videoId).select("visibility owner");
+
+    if (
+      rawVideo.visibility === "private" &&
+      rawVideo.owner.toString() !== req.user?._id?.toString()
+    ) {
+      throw new ApiError(403, "This video is private");
+    }
   }
 
   const ip = req.ip;
@@ -402,27 +418,19 @@ const getVideoById = asyncHandler(async (req, res) => {
       { returnDocument: "after" }
     );
   }
-  if (videoFile[0].owner?._id?.toString() !== req.user?._id?.toString()) {
-    // only re-check visibility for non-owners; owner should always see their own video
-    const rawVideo = await Video.findById(videoId).select("visibility owner");
-    if (
-      rawVideo.visibility === "private" &&
-      rawVideo.owner.toString() !== req.user?._id?.toString()
-    ) {
-      throw new ApiError(403, "This video is private");
-    }
-  }
   const viewCount =
     updatedVideo.viewedBy.userId.length + updatedVideo.viewedBy.Ip.length;
 
   await Video.findByIdAndUpdate(videoId, { views: viewCount });
 
   // add this video to user watch history
-  await User.findByIdAndUpdate(req.user?._id, {
-    $addToSet: {
-      watchHistory: videoId,
-    },
-  });
+  if (req.user?._id) {
+    await User.findByIdAndUpdate(req.user._id, {
+      $addToSet: {
+        watchHistory: videoId,
+      },
+    });
+  }
 
   return res
     .status(200)
@@ -467,7 +475,10 @@ const updateVideo = asyncHandler(async (req, res) => {
       await deleteOnCloudinary(video.thumbnail.public_id);
     }
 
-    updateFields.thumbnail = thumbnail.url;
+    updateFields.thumbnail = {
+      url: thumbnail.url,
+      public_id: thumbnail.public_id,
+    };
   }
 
   const updatedVideo = await Video.findByIdAndUpdate(

@@ -16,6 +16,9 @@ const toggleSubscription = asyncHandler(async (req, res) => {
   if (!channel) {
     throw new ApiError(400, "Channel not found");
   }
+  if (channelId === req.user._id.toString()) {
+    throw new ApiError(400, "You cannot subscribe to your own channel");
+  }
   const alreadySubscribed = await Subscription.findOne({
     channel: channelId,
     subscriber: req.user?._id,

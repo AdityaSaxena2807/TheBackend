@@ -8,24 +8,20 @@ import asyncHandler from "../utils/asyncHandler.js";
 
 //!CREATE TWEET
 const createTweet = asyncHandler(async (req, res) => {
-  //TODO: create tweet
-  const { content } = req.body;
+  // Extract and normalize content
+  const content = req.body.content?.trim();
+
   if (!content) {
     throw new ApiError(400, "Tweet body is missing");
   }
-  const existingTweet = await Tweet.findOne({ content });
-  if (existingTweet && existingTweet.owner.equals(req.user?._id)) {
-    throw new ApiError(409, "Tweet with same content and owner already exists");
-  }
+  // Create tweet
   const tweet = await Tweet.create({
     content,
-    owner: req.user?._id,
+    owner: req.user._id,
   });
 
-  const populatedTweet = await Tweet.findById(tweet._id).populate(
-    "owner",
-    "username avatar"
-  );
+  // Populate owner details
+  const populatedTweet = await tweet.populate("owner", "username avatar");
 
   const responseTweet = {
     _id: populatedTweet._id,

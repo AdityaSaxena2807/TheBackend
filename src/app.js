@@ -60,3 +60,6 @@ export default app;
 //! CLOUDINARY_CLOUD_NAME=duckyyyt   
 //! CLOUDINARY_API_KEY=219658648964972
 //! CLOUDINARY_API_SECRET=1J8TIizZpVTquSBX4KHNYAfKqtE
+//! CORS_ORIGIN=http://localhost:5173
+//! NODE_ENV=development
+//TODO these to be deleted asap

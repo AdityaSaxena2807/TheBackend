@@ -15,6 +15,12 @@ const getVideoComments = asyncHandler(async (req, res) => {
   if (!video) {
     throw new ApiError(400, "Video not found");
   }
+  if (
+    video.visibility === "private" &&
+    video.owner.toString() !== req.user?._id?.toString()
+  ) {
+    throw new ApiError(403, "This video is private");
+  }
   //removing the await here because we are using aggregatePaginate which will handle the execution of the aggregate function and pagination together
   const commentsAggregate = Comment.aggregate([
     {
@@ -104,7 +110,12 @@ const addComment = asyncHandler(async (req, res) => {
   if (!video) {
     throw new ApiError(400, "Video not found");
   }
-
+  if (
+    video.visibility === "private" &&
+    video.owner.toString() !== req.user?._id?.toString()
+  ) {
+    throw new ApiError(403, "This video is private");
+  }
   const comment = await Comment.create({
     content,
     video: videoId,

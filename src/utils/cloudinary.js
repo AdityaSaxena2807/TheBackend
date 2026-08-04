@@ -18,22 +18,30 @@ const uploadOnCloudinary = async (localFilePath) => {
     fs.unlinkSync(localFilePath);
     // console.log("File uploaded successfully on Cloudinary: ", response.url);
     //console.log(response) this was used to check cloudinary response in order to extract video duration
-    return response;
+    return {
+      url: response.secure_url,
+      public_id: response.public_id,
+      duration: response.duration,
+    };
   } catch (error) {
     fs.unlinkSync(localFilePath); //delete the locally saved temporary file from local storage
     //as thee upload got failed
     console.error("Error uploading to Cloudinary:", error);
   }
 };
-const deleteOnCloudinary = async (publicId) => {
+const deleteOnCloudinary = async (publicId, resourceType = "image") => {
   try {
-    if (!publicId) return "no publicId provided";
-    const response = await cloudinary.uploader.destroy(publicId, {
-      resource_type: "auto",
+    if (!publicId) {
+      console.warn("No publicId provided");
+      return null;
+    }
+
+    return await cloudinary.uploader.destroy(publicId, {
+      resource_type: resourceType,
     });
-    return response;
   } catch (error) {
     console.error("Error deleting from Cloudinary:", error);
+    return null;
   }
 };
 export { uploadOnCloudinary, deleteOnCloudinary };
