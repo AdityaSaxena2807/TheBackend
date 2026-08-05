@@ -142,7 +142,7 @@ const getUserTweets = asyncHandler(async (req, res) => {
           {
             $project: {
               username: 1,
-              "avatar.url": 1,
+              avatar: 1,
             },
           },
         ],
@@ -191,7 +191,10 @@ const getUserTweets = asyncHandler(async (req, res) => {
     {
       $project: {
         content: 1,
+        "ownerDetails._id": 1,
         "ownerDetails.username": 1,
+        "ownerDetails.avatar": 1,
+        avatar:1,
         likesCount: 1,
         createdAt: 1,
         isLiked: 1,
