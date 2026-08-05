@@ -39,7 +39,14 @@ const generateAccessAndRefreshToken = async (userId) => {
  //*return res
  **/
 const registerUser = asyncHandler(async (req, res) => {
-  const { fullName, email, username, password } = req.body;
+  const {
+    fullName,
+    email,
+    username,
+    password,
+    securityQuestion,
+    securityAnswer,
+  } = req.body;
   console.log("email: ", email);
   //check if nothing is empty
   if (
@@ -93,6 +100,8 @@ const registerUser = asyncHandler(async (req, res) => {
       public_id: coverImageResponse.public_id,
     },
     password,
+    securityQuestion,
+    securityAnswer,
   });
   //remove password and refresh token from the response while checking for user creation
   //select is used to select the fields that we want to return in the response
@@ -172,6 +181,56 @@ const loginUser = asyncHandler(async (req, res) => {
         refreshToken,
       })
     );
+});
+
+//! VERIFY RESET USER
+const verifyResetUser = asyncHandler(async (req, res) => {
+  const { username, email } = req.body;
+
+  if (!username || !email) {
+    throw new ApiError(400, "Username and email are required");
+  }
+
+  const user = await User.findOne({ username, email });
+
+  if (!user) {
+    throw new ApiError(404, "No account found with this username and email");
+  }
+
+  return res.status(200).json(
+    new ApiResponse(200, "User verified", {
+      userId: user._id,
+      securityQuestion: user.securityQuestion,
+    })
+  );
+});
+
+//! RESET PASSWORD
+const resetPassword = asyncHandler(async (req, res) => {
+  const { userId, securityAnswer, newPassword } = req.body;
+
+  if (!userId || !securityAnswer || !newPassword) {
+    throw new ApiError(400, "All fields are required");
+  }
+
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const isAnswerCorrect = await user.isSecurityAnswerCorrect(securityAnswer);
+
+  if (!isAnswerCorrect) {
+    throw new ApiError(401, "Security answer is incorrect");
+  }
+
+  user.password = newPassword;
+  await user.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Password reset successfully", {}));
 });
 
 //! LOGOUT USER
@@ -549,4 +608,6 @@ export {
   updateUserCoverImage,
   getUserChannelProfile,
   getWatchHistory,
+  verifyResetUser,
+  resetPassword,
 };
