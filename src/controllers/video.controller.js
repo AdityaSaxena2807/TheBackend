@@ -232,6 +232,27 @@ const getAllVideos = asyncHandler(async (req, res) => {
   );
 });
 
+//! GET SUGGESTED VIDEOS
+const getSuggestedVideos = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+
+  const currentVideo = await Video.findById(videoId);
+  if (!currentVideo) throw new ApiError(404, "Video not found");
+
+  const suggestions = await Video.find({
+    _id: { $ne: videoId },
+    isPublished: true,
+    $or: [{ visibility: "public" }, { owner: req.user?._id }],
+  })
+    .sort({ views: -1, createdAt: -1 })
+    .limit(10)
+    .populate("owner", "username avatar");
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Suggested videos fetched", suggestions));
+});
+
 //! PUBLISH A VIDEO
 const publishAVideo = asyncHandler(async (req, res) => {
   // TODO: get video, upload to cloudinary, create video
@@ -567,4 +588,5 @@ export {
   updateVideo,
   deleteVideo,
   togglePublishStatus,
+  getSuggestedVideos,
 };

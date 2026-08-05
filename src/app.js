@@ -15,9 +15,10 @@ import errorHandler from "./middlewares/errorHandler.middleware.js";
 //cookie-parser's role is that it allows the server to perform crud operation on the cookies in browser of the client
 
 const app = express();
+const allowedOrigins = process.env.CORS_ORIGIN.split(",");
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: allowedOrigins,
     credentials: true,
   })
 );
@@ -52,12 +53,12 @@ a route /register in userRouter, then it will be accessed as /api/v1/users/regis
 **/
 export default app;
 //! mongodb+srv://Aditya:Aditya123@cluster1.rff7t0w.mongodb.net
-//! CLOUDINARY_CLOUD_NAME=adityayt   
+//! CLOUDINARY_CLOUD_NAME=adityayt
 //! CLOUDINARY_API_KEY=792518714555228
 //! CLOUDINARY_API_SECRET=ahqsn8ggCwvtQeq5w0wY13Jb67I
 
 //! mongodb+srv://saxenaaditya2807_db_user:Password123@cluster0.oc4rehb.mongodb.net/
-//! CLOUDINARY_CLOUD_NAME=duckyyyt   
+//! CLOUDINARY_CLOUD_NAME=duckyyyt
 //! CLOUDINARY_API_KEY=219658648964972
 //! CLOUDINARY_API_SECRET=1J8TIizZpVTquSBX4KHNYAfKqtE
 //! CORS_ORIGIN=http://localhost:5173
