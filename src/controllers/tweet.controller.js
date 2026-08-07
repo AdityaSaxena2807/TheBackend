@@ -44,7 +44,18 @@ const createTweet = asyncHandler(async (req, res) => {
 
 //!GET ALL TWEETS
 const getAllTweets = asyncHandler(async (req, res) => {
-  const tweets = await Tweet.aggregate([
+  const {
+    page = 1,
+    limit = 10,
+    sortBy = "createdAt",
+    sortType = "desc",
+  } = req.query;
+
+  const pageNum = Math.max(parseInt(page), 1);
+  const limitNum = Math.max(parseInt(limit), 1);
+  const sortOrder = sortType === "asc" ? 1 : -1;
+
+  const result = await Tweet.aggregate([
     {
       $lookup: {
         from: "users",
@@ -109,23 +120,41 @@ const getAllTweets = asyncHandler(async (req, res) => {
         isLiked: 1,
       },
     },
-    { $sort: { createdAt: -1 } },
+    { $sort: { [sortBy]: sortOrder } },
+    {
+      $facet: {
+        tweets: [{ $skip: (pageNum - 1) * limitNum }, { $limit: limitNum }],
+        totalCount: [{ $count: "count" }],
+      },
+    },
   ]);
-  return res
-    .status(200)
-    .json(new ApiResponse(200, "Tweets fetched successfully", tweets));
+
+  const tweets = result[0].tweets;
+  const totalTweets = result[0].totalCount[0]?.count || 0;
+
+  return res.status(200).json(
+    new ApiResponse(200, "Tweets fetched successfully", {
+      tweets,
+      totalTweets,
+      totalPages: Math.ceil(totalTweets / limitNum),
+      currentPage: pageNum,
+    })
+  );
 });
 
 //!GET USER TWEETS
 const getUserTweets = asyncHandler(async (req, res) => {
-  // TODO: get user tweets
   const { userId } = req.params;
+  const { sortBy = "createdAt", sortType = "desc" } = req.query;
   if (!userId) {
     throw new ApiError(400, "user not found");
   }
   if (!isValidObjectId(userId)) {
     throw new ApiError(400, "Invalid userId");
   }
+
+  const sortOrder = sortType === "asc" ? 1 : -1;
+
   const tweets = await Tweet.aggregate([
     {
       $match: {
@@ -194,12 +223,13 @@ const getUserTweets = asyncHandler(async (req, res) => {
         "ownerDetails._id": 1,
         "ownerDetails.username": 1,
         "ownerDetails.avatar": 1,
-        avatar:1,
+        avatar: 1,
         likesCount: 1,
         createdAt: 1,
         isLiked: 1,
       },
     },
+    { $sort: { [sortBy]: sortOrder } },
   ]);
   return res
     .status(200)

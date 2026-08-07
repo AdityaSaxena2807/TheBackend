@@ -13,6 +13,7 @@ import {
   getWatchHistory,
   verifyResetUser,
   resetPassword,
+  updatePreferences,
 } from "../controllers/User.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
@@ -50,4 +51,5 @@ router
 // /c/:username this is because we are fetching username as a route param
 router.route("/c/:username").get(optionalAuth, getUserChannelProfile);
 router.route("/watch-history").get(verifyJWT, getWatchHistory);
+router.patch("/preferences", verifyJWT, updatePreferences);
 export default router;

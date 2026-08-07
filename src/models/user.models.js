@@ -60,6 +60,13 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
+    preferences: {
+      logo: {
+        type: String,
+        enum: ["Duck", "LuffyDuck", "ZoroDuck"],
+        default: "Duck",
+      },
+    },
   },
   { timestamps: true }
 );

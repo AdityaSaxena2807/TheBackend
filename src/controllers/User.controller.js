@@ -596,6 +596,21 @@ const getWatchHistory = asyncHandler(async (req, res) => {
     );
 });
 
+//! UPDATE PREFERENCES
+const updatePreferences = asyncHandler(async (req, res) => {
+  const { logo } = req.body;
+
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    { $set: { "preferences.logo": logo } },
+    { new: true }
+  ).select("-password -refreshToken");
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "Preferences updated"));
+});
+
 export {
   registerUser,
   loginUser,
@@ -610,4 +625,5 @@ export {
   getWatchHistory,
   verifyResetUser,
   resetPassword,
+  updatePreferences,
 };
