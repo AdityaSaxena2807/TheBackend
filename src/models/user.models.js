@@ -2,6 +2,33 @@ import mongoose, { Schema } from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
+const LOGO_NAMES = [
+  "AangDuck",
+  "CharmanderDuck",
+  "DenjiDuck",
+  "Duck",
+  "GokuDuck",
+  "HarryDuck",
+  "LuffyDuck",
+  "LuigiDuck",
+  "MarioDuck",
+  "MessiDuck",
+  "MinecraftDuck",
+  "MrBeastDuck",
+  "NarutoDuck",
+  "NezukoDuck",
+  "PikachuDuck",
+  "RengokuDuck",
+  "SasukeDuck",
+  "SlowDuck",
+  "TanjiroDuck",
+  "ThanosDuck",
+  "VegetaDuck",
+  "YellowDuck",
+  "ZenitsuDuck",
+  "ZoroDuck",
+];
+
 const userSchema = new Schema(
   {
     username: {
@@ -63,7 +90,7 @@ const userSchema = new Schema(
     preferences: {
       logo: {
         type: String,
-        enum: ["Duck", "LuffyDuck", "ZoroDuck"],
+        enum: LOGO_NAMES,
         default: "Duck",
       },
     },
