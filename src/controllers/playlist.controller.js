@@ -239,7 +239,7 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
         videos: { $each: [videoId], $position: 0 },
       },
     },
-    { new: true }
+    { returnDocument: "after" }
   );
 
   if (!updatedPlaylist) {

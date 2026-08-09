@@ -15,7 +15,7 @@ import errorHandler from "./middlewares/errorHandler.middleware.js";
 //cookie-parser's role is that it allows the server to perform crud operation on the cookies in browser of the client
 
 const app = express();
-const allowedOrigins = process.env.CORS_ORIGIN.split(",");
+const allowedOrigins = (process.env.CORS_ORIGIN || "").split(",");
 app.use(
   cors({
     origin: allowedOrigins,
@@ -52,5 +52,3 @@ a route /register in userRouter, then it will be accessed as /api/v1/users/regis
 //* so the link will look like this: http://localhost:8000/api/v1/users/register
 **/
 export default app;
-
-

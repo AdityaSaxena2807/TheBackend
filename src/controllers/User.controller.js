@@ -603,7 +603,7 @@ const updatePreferences = asyncHandler(async (req, res) => {
   const user = await User.findByIdAndUpdate(
     req.user._id,
     { $set: { "preferences.logo": logo } },
-    { new: true }
+    { returnDocument: "after" }
   ).select("-password -refreshToken");
 
   return res
