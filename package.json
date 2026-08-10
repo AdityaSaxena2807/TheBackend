@@ -31,6 +31,7 @@
     "mongodb": "^7.3.0",
     "mongoose": "^9.9.1",
     "mongoose-aggregate-paginate-v2": "^1.1.4",
+    "moongoose": "^0.0.5",
     "multer": "^2.2.0"
   },
   "allowScripts": {

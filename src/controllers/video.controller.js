@@ -52,12 +52,6 @@ const getAllVideos = asyncHandler(async (req, res) => {
                 },
               },
             },
-            {
-              autocomplete: {
-                query,
-                path: "description",
-              },
-            },
           ],
           minimumShouldMatch: 1,
         },

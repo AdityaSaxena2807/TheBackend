@@ -1,170 +1,234 @@
-# TheBackend
+# 🦆 DUCKY — Backend API
 
-A Node.js and Express backend for a video-sharing / social-media style application. It supports user authentication, video publishing, comments, likes, playlists, subscriptions, tweets, and dashboard analytics.
+A production-ready **scalable backend system** for a modern video-sharing platform, built with **Node.js, Express, and MongoDB**.
+DUCKY provides a robust API layer for handling users, videos, interactions, and real-time engagement features.
 
-## Features
+---
 
-- User registration, login, logout, token refresh, and profile management
-- Secure JWT-based authentication with cookies
-- Video upload and management with Cloudinary integration
-- Comments, likes, playlists, subscriptions, and tweets
-- Optional authentication middleware for public access to some endpoints
-- MongoDB database integration with Mongoose
-- Centralized API error handling and consistent response format
+## 🚀 Overview
 
-## Tech Stack
+DUCKY backend is designed with a **modular, scalable architecture** following industry best practices. It powers core features such as:
 
-- Node.js
-- Express.js
-- MongoDB + Mongoose
-- JWT for authentication
-- Cloudinary for media uploads
-- Multer for file uploads
-- Cookie-parser and CORS
-- Nodemon for development
+- User authentication & session management
+- Video publishing & streaming metadata
+- Social interactions (likes, comments, subscriptions)
+- Playlist and content organization
+- Creator analytics dashboard
 
-## Project Structure
+The system emphasizes **clean architecture, reusable utilities, and efficient database querying using MongoDB aggregations**.
+
+---
+
+## 🏗️ Architecture
+
+The project follows a **layered architecture pattern**:
 
 ```bash
 src/
-  app.js              # Express app configuration
-  index.js            # Server entry point
-  constants.js        # Application constants
-  controllers/        # Request handlers
-  db/                 # Database connection setup
-  middlewares/        # Auth, error handling, upload middleware
-  models/             # Mongoose schemas and models
-  routes/             # API routes
-  utils/              # Helpers and API response utilities
+├── controllers/     # Business logic (feature-wise separation)
+├── models/          # Mongoose schemas & data layer
+├── routes/          # API route definitions
+├── middlewares/     # Auth, error handling, request processing
+├── utils/           # Shared utilities (API response, error, async handler)
+├── db/              # Database connection
+├── app.js           # Express app configuration
+└── index.js         # Application entry point
 ```
 
-## Prerequisites
+Reference from project structure:
 
-Make sure you have the following installed:
+---
 
-- Node.js (recommended: 18+)
-- MongoDB instance or MongoDB Atlas connection string
-- Cloudinary account for media uploads
+## 🧩 Core Modules
 
-## Installation
+### 👤 Authentication & Users
 
-1. Clone the repository
-2. Install dependencies:
+- Secure registration & login (JWT + cookies)
+- Access & refresh token strategy
+- Profile management with avatar & cover image upload
+
+### 🎥 Video System
+
+- Video metadata management
+- Visibility control (public/private)
+- Optimized querying with aggregation pipelines
+
+### 💬 Comments
+
+- Add, update, delete comments
+- Like/unlike comments
+- Pagination with aggregation
+
+### ❤️ Likes System
+
+- Unified like system for:
+  - Videos
+  - Comments
+  - Tweets
+
+- Efficient toggle mechanism
+
+### 📂 Playlists
+
+- Create and manage playlists
+- Add/remove videos
+- Aggregate playlist stats (views, count)
+
+### 🔔 Subscriptions
+
+- Subscribe/unsubscribe to channels
+- Fetch subscribers & subscribed channels
+
+### 🐦 Tweets (Micro-content)
+
+- Lightweight posting system
+- Like support & pagination
+
+### 📊 Dashboard
+
+- Channel analytics:
+  - Total views
+  - Total likes
+  - Subscriber count
+  - Video count
+
+### 🩺 Healthcheck
+
+- API status endpoint for monitoring
+
+---
+
+## ⚙️ Tech Stack
+
+| Layer       | Technology                         |
+| ----------- | ---------------------------------- |
+| Runtime     | Node.js                            |
+| Framework   | Express.js                         |
+| Database    | MongoDB + Mongoose                 |
+| Auth        | JWT (Access + Refresh Tokens)      |
+| File Upload | Multer + Cloudinary                |
+| Utilities   | Custom API response/error handling |
+
+---
+
+## 🔐 Security & Best Practices
+
+- HTTP-only secure cookies for tokens
+- Centralized error handling middleware
+- Input validation and sanitization
+- Protected routes via auth middleware
+- Separation of concerns (controller/service pattern)
+
+---
+
+## ⚡ Key Highlights
+
+- 📈 **Advanced MongoDB Aggregations** for performance
+- 🔄 **Pagination-ready APIs**
+- 🧱 **Modular and scalable codebase**
+- 🧪 Clean API response structure (`ApiResponse`)
+- 🚫 Consistent error handling (`ApiError`)
+- ☁️ Cloudinary integration for media
+
+---
+
+## 🛠️ Getting Started
+
+### 1. Clone Repository
+
+```bash
+git clone <repository-url>
+cd ducky-backend
+```
+
+### 2. Install Dependencies
 
 ```bash
 npm install
 ```
 
-3. Create a `.env` file in the project root with the following variables:
+### 3. Environment Variables
+
+Create a `.env` file:
 
 ```env
 PORT=8000
-MONGODB_URL=mongodb://127.0.0.1:27017
-DB_NAME=my_database
-ACCESS_TOKEN_SECRET=your_access_token_secret
-REFRESH_TOKEN_SECRET=your_refresh_token_secret
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
+MONGO_URI=your_mongodb_uri
+CORS_ORIGIN=http://localhost:5173
+
+ACCESS_TOKEN_SECRET=your_secret
+REFRESH_TOKEN_SECRET=your_secret
+
+CLOUDINARY_CLOUD_NAME=xxx
+CLOUDINARY_API_KEY=xxx
+CLOUDINARY_API_SECRET=xxx
 ```
 
-## Running the Server
-
-Development mode:
+### 4. Run Server
 
 ```bash
 npm run dev
 ```
 
-Production mode:
+---
 
-```bash
-npm start
+## 📡 API Base URL
+
+```
+http://localhost:8000/api/v1
 ```
 
-The server will start on:
+---
 
-```bash
-http://localhost:8000
+## 📌 Example Routes
+
+| Method | Endpoint                    | Description       |
+| ------ | --------------------------- | ----------------- |
+| POST   | `/users/register`           | Register user     |
+| POST   | `/users/login`              | Login             |
+| GET    | `/videos`                   | Get videos        |
+| POST   | `/comments/:videoId`        | Add comment       |
+| POST   | `/likes/video/:videoId`     | Toggle video like |
+| POST   | `/subscriptions/:channelId` | Subscribe         |
+
+---
+
+## 🧠 Design Principles
+
+- **Scalability first** — modular codebase
+- **Performance focused** — aggregation pipelines
+- **Clean API contracts** — consistent response structure
+- **Developer friendly** — reusable utilities & clear separation
+
+---
+
+## 🧪 Testing
+
+Postman collection included:
+
+```
+Aditya.postman_collection.json
 ```
 
-## API Overview
+---
 
-### Health Check
+## 📦 Scripts
 
-- `GET /api/v1/healthcheck`
+```bash
+npm run dev     # Development server
+npm start       # Production server
+```
 
-### Users
+---
 
-- `POST /api/v1/users/register`
-- `POST /api/v1/users/login`
-- `POST /api/v1/users/logout`
-- `POST /api/v1/users/refresh-token`
-- `POST /api/v1/users/change-password`
-- `GET /api/v1/users/current-user`
-- `PATCH /api/v1/users/update-account`
-- `PATCH /api/v1/users/avatar`
-- `PATCH /api/v1/users/coverImage`
-- `GET /api/v1/users/c/:username`
-- `GET /api/v1/users/watch-history`
+## 👨‍💻 Author
 
-### Videos
+**Aditya Saxena**
+MERN Stack Developer
+VIT Vellore (2025 Graduate)
 
-- `GET /api/v1/videos`
-- `POST /api/v1/videos`
-- `GET /api/v1/videos/:videoId`
-- `PATCH /api/v1/videos/:videoId`
-- `DELETE /api/v1/videos/:videoId`
-- `PATCH /api/v1/videos/toggle/publish/:videoId`
+---
 
-### Tweets
+## 📄 License
 
-- `POST /api/v1/tweets`
-- `GET /api/v1/tweets/user/:userId`
-- `PATCH /api/v1/tweets/:tweetId`
-- `DELETE /api/v1/tweets/:tweetId`
-
-### Comments
-
-- `GET /api/v1/comments/:videoId`
-- `POST /api/v1/comments/:videoId`
-- `PATCH /api/v1/comments/c/:commentId`
-- `DELETE /api/v1/comments/c/:commentId`
-
-### Likes
-
-- `POST /api/v1/likes/toggle/v/:videoId`
-- `POST /api/v1/likes/toggle/c/:commentId`
-- `POST /api/v1/likes/toggle/t/:tweetId`
-- `GET /api/v1/likes/videos`
-
-### Playlists
-
-- `POST /api/v1/playlists`
-- `GET /api/v1/playlists/:playlistId`
-- `PATCH /api/v1/playlists/:playlistId`
-- `DELETE /api/v1/playlists/:playlistId`
-- `PATCH /api/v1/playlists/add/:videoId/:playlistId`
-- `PATCH /api/v1/playlists/remove/:videoId/:playlistId`
-- `GET /api/v1/playlists/user/:userId`
-
-### Subscriptions
-
-- `GET /api/v1/subscriptions/c/:channelId`
-- `POST /api/v1/subscriptions/c/:channelId`
-- `GET /api/v1/subscriptions/u/:subscriberId`
-
-### Dashboard
-
-- `GET /api/v1/dashboard/stats`
-- `GET /api/v1/dashboard/videos`
-
-## Notes
-
-- The backend is configured to accept requests from `http://localhost:5173` via CORS.
-- Media files are uploaded to Cloudinary and stored temporarily before being handled by the upload utility.
-- Authentication is enforced on protected routes using JWT tokens from cookies or the `Authorization` header.
-
-## License
-
-This project is licensed under ISC.
+This project is licensed under the MIT License.
