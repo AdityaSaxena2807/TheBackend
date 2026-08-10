@@ -9,8 +9,8 @@ import asyncHandler from "../utils/asyncHandler.js";
 const createPlaylist = asyncHandler(async (req, res) => {
   //TODO: create playlist
   const { name, description } = req.body;
-  if ([name, description].some((field) => field?.trim() === "")) {
-    throw new ApiError(400, "All fields are required");
+  if (!name || name.trim() === "") {
+    throw new ApiError(400, "Playlist name is required");
   }
   const playlist = await Playlist.create({
     name,
@@ -229,7 +229,7 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Only owner can add video to their Playlist");
   }
   if (playlist.videos.some((v) => v.toString() === videoId)) {
-    throw new ApiError(400, "Video already exists in this playlist");
+    throw new ApiError(409, "Video already exists in this playlist");
   }
 
   const updatedPlaylist = await Playlist.findByIdAndUpdate(
@@ -326,8 +326,8 @@ const updatePlaylist = asyncHandler(async (req, res) => {
   //TODO: update playlist/
   const { playlistId } = req.params;
   const { name, description } = req.body;
-  if ([name, description].some((field) => field?.trim() === "")) {
-    throw new ApiError(400, "All fields are required");
+  if (!name || name.trim() === "") {
+    throw new ApiError(400, "Playlist name is required");
   }
   if (!isValidObjectId(playlistId)) {
     throw new ApiError(400, "Invalid playlistId");
